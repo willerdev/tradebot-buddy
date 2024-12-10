@@ -27,6 +27,98 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_trades: {
+        Row: {
+          bot_id: string
+          closed_at: string | null
+          created_at: string
+          entry_price: number
+          exit_price: number | null
+          id: string
+          metadata: Json | null
+          pnl: number | null
+          quantity: number
+          side: string
+          status: string | null
+          symbol: string
+          user_id: string
+        }
+        Insert: {
+          bot_id: string
+          closed_at?: string | null
+          created_at?: string
+          entry_price: number
+          exit_price?: number | null
+          id?: string
+          metadata?: Json | null
+          pnl?: number | null
+          quantity: number
+          side: string
+          status?: string | null
+          symbol: string
+          user_id: string
+        }
+        Update: {
+          bot_id?: string
+          closed_at?: string | null
+          created_at?: string
+          entry_price?: number
+          exit_price?: number | null
+          id?: string
+          metadata?: Json | null
+          pnl?: number | null
+          quantity?: number
+          side?: string
+          status?: string | null
+          symbol?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bot_trades_bot_id_fkey"
+            columns: ["bot_id"]
+            isOneToOne: false
+            referencedRelation: "trading_bots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broker_connections: {
+        Row: {
+          api_key: string
+          api_secret: string
+          broker_name: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          last_connected_at: string | null
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          api_secret: string
+          broker_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_connected_at?: string | null
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          api_secret?: string
+          broker_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          last_connected_at?: string | null
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -656,6 +748,56 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      trading_bots: {
+        Row: {
+          broker_connection_id: string | null
+          configuration: Json | null
+          created_at: string
+          id: string
+          last_error: string | null
+          name: string
+          performance_metrics: Json | null
+          status: string | null
+          strategy: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          broker_connection_id?: string | null
+          configuration?: Json | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          name: string
+          performance_metrics?: Json | null
+          status?: string | null
+          strategy: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          broker_connection_id?: string | null
+          configuration?: Json | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          name?: string
+          performance_metrics?: Json | null
+          status?: string | null
+          strategy?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_bots_broker_connection_id_fkey"
+            columns: ["broker_connection_id"]
+            isOneToOne: false
+            referencedRelation: "broker_connections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trading_orders: {
         Row: {
