@@ -94,6 +94,7 @@ export type Database = {
           last_connected_at: string | null
           metadata: Json | null
           user_id: string
+          website: string | null
         }
         Insert: {
           api_key: string
@@ -105,6 +106,7 @@ export type Database = {
           last_connected_at?: string | null
           metadata?: Json | null
           user_id: string
+          website?: string | null
         }
         Update: {
           api_key?: string
@@ -116,6 +118,7 @@ export type Database = {
           last_connected_at?: string | null
           metadata?: Json | null
           user_id?: string
+          website?: string | null
         }
         Relationships: []
       }

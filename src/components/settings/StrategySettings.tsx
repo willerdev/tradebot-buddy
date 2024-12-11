@@ -1,41 +1,37 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 
 const formSchema = z.object({
-  name: z.string().min(2),
-  strategy: z.string().min(10),
-  configuration: z.string().min(2),
+  name: z.string().min(2, "Strategy name must be at least 2 characters"),
+  strategy: z.string().min(2, "Strategy must be specified"),
+  configuration: z.string().optional(),
 });
 
 export function StrategySettings() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: tradingBots, refetch } = useQuery({
-    queryKey: ["trading-bots"],
+  const { data: strategies, refetch } = useQuery({
+    queryKey: ["trading-strategies"],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("trading_bots")
         .select("*")
+        .eq("user_id", user.user.id)
         .order("created_at", { ascending: false });
+      
       if (error) throw error;
       return data;
     },
@@ -43,18 +39,25 @@ export function StrategySettings() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      strategy: "",
+      configuration: "",
+    },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.from("trading_bots").insert([
-        {
-          name: values.name,
-          strategy: values.strategy,
-          configuration: JSON.parse(values.configuration),
-        },
-      ]);
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
+      const { error } = await supabase.from("trading_bots").insert({
+        name: values.name,
+        strategy: values.strategy,
+        configuration: values.configuration,
+        user_id: user.user.id
+      });
 
       if (error) throw error;
 
@@ -67,7 +70,7 @@ export function StrategySettings() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add strategy. Please check your configuration JSON.",
+        description: "Failed to add strategy. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -80,30 +83,19 @@ export function StrategySettings() {
       <div>
         <h3 className="text-lg font-medium">Trading Strategies</h3>
         <p className="text-sm text-muted-foreground">
-          Manage your automated trading strategies and configurations.
+          Manage your trading strategies for automated trading.
         </p>
       </div>
 
       <div className="grid gap-4">
-        {tradingBots?.map((bot) => (
-          <Card key={bot.id}>
+        {strategies?.map((strategy) => (
+          <Card key={strategy.id}>
             <CardHeader>
-              <CardTitle>{bot.name}</CardTitle>
-              <CardDescription>Strategy: {bot.strategy}</CardDescription>
+              <CardTitle>{strategy.name}</CardTitle>
+              <CardDescription>{strategy.strategy}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div>
-                  <span className="font-medium">Status:</span>{" "}
-                  <span className={bot.status === "running" ? "text-trading-profit" : "text-trading-neutral"}>
-                    {bot.status}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium">Created:</span>{" "}
-                  {new Date(bot.created_at).toLocaleDateString()}
-                </div>
-              </div>
+              <p>Configuration: {strategy.configuration || 'No configuration provided'}</p>
             </CardContent>
           </Card>
         ))}
@@ -112,7 +104,7 @@ export function StrategySettings() {
       <Card>
         <CardHeader>
           <CardTitle>Add New Strategy</CardTitle>
-          <CardDescription>Create a new trading strategy configuration.</CardDescription>
+          <CardDescription>Connect a new trading strategy to your account.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -135,9 +127,9 @@ export function StrategySettings() {
                 name="strategy"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Strategy Type</FormLabel>
+                    <FormLabel>Strategy</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g., MACD Crossover, RSI Strategy" />
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -148,29 +140,16 @@ export function StrategySettings() {
                 name="configuration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Configuration (JSON)</FormLabel>
+                    <FormLabel>Configuration</FormLabel>
                     <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder='{
-  "timeframe": "1h",
-  "symbols": ["BTC/USDT"],
-  "parameters": {
-    "rsi_period": 14,
-    "rsi_overbought": 70,
-    "rsi_oversold": 30
-  }
-}'
-                      />
+                      <Input {...field} />
                     </FormControl>
-                    <FormDescription>
-                      Enter the strategy configuration in JSON format
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Add Strategy
               </Button>
             </form>
