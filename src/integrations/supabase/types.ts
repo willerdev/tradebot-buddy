@@ -83,20 +83,6 @@ export type Database = {
           },
         ]
       }
-
-export interface BrokerConnection {
-  id: string;
-  user_id: string;
-  broker_name: string;
-  website: string;
-  api_key: string;
-  api_secret: string;
-  is_active: boolean;
-  created_at: string;
-  last_connected_at: string | null;
-  metadata: Json | null;
-}
-
       broker_connections: {
         Row: {
           api_key: string
@@ -1018,4 +1004,3 @@ export type CompositeTypes<
   : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
     ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
-
