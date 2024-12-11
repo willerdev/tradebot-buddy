@@ -1,106 +1,74 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { supabase } from "@/integrations/supabase/client";
-
-const formSchema = z.object({
-  email: z.string().email(),
-  fullName: z.string().min(2).max(50),
-  phone: z.string().optional(),
-});
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AccountSettings() {
-  const { toast } = useToast();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-  });
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    try {
-      const { error } = await supabase.auth.updateUser({
-        email: values.email,
-        data: { full_name: values.fullName },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Settings updated",
-        description: "Your account settings have been updated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update settings. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">Account Settings</h3>
+        <h3 className="text-lg font-medium">Account</h3>
         <p className="text-sm text-muted-foreground">
-          Update your account settings and contact information.
+          Manage your account settings and preferences.
         </p>
       </div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input {...field} type="email" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Phone Number (Optional)</FormLabel>
-                <FormControl>
-                  <Input {...field} type="tel" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Save Changes</Button>
-        </form>
-      </Form>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>Update your personal information</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center space-x-4">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src="/placeholder.svg" />
+              <AvatarFallback>UN</AvatarFallback>
+            </Avatar>
+            <Button variant="outline">Change Avatar</Button>
+          </div>
+
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Full Name</Label>
+              <Input id="name" placeholder="Enter your full name" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="Enter your email" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <Input id="phone" type="tel" placeholder="Enter your phone number" />
+            </div>
+          </div>
+
+          <Button>Save Changes</Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Notifications</CardTitle>
+          <CardDescription>Configure your notification preferences</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <input type="checkbox" id="trade" className="rounded border-gray-300" defaultChecked />
+              <Label htmlFor="trade">Trade Notifications</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input type="checkbox" id="system" className="rounded border-gray-300" defaultChecked />
+              <Label htmlFor="system">System Updates</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input type="checkbox" id="marketing" className="rounded border-gray-300" />
+              <Label htmlFor="marketing">Marketing Communications</Label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
