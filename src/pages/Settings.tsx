@@ -4,7 +4,7 @@ import { StrategySettings } from "@/components/settings/StrategySettings";
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { User, Palette, Shield } from "lucide-react";
+import { User, Palette, Shield, TrendingUp } from "lucide-react";
 
 export default function Settings() {
   const isMobile = useIsMobile();

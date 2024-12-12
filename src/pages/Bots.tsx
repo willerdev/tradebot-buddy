@@ -7,6 +7,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+interface TradingBot {
+  id: string;
+  name: string;
+  strategy: string;
+  status: string;
+  performance_metrics: {
+    total_pnl?: number;
+    [key: string]: any;
+  };
+}
+
 export default function Bots() {
   const { startBot, stopBot } = useBotManagement();
   const { toast } = useToast();
@@ -25,7 +36,7 @@ export default function Bots() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as TradingBot[];
     },
   });
 
@@ -153,7 +164,7 @@ export default function Bots() {
                     <span className="text-sm text-muted-foreground">Performance</span>
                     <span className="text-sm font-medium flex items-center gap-1">
                       <TrendingUp className="h-4 w-4 text-green-500" />
-                      {bot.performance_metrics.total_pnl || "0.00"}%
+                      {bot.performance_metrics.total_pnl?.toFixed(2) || "0.00"}%
                     </span>
                   </div>
                 )}
