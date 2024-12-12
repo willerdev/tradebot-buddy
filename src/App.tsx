@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Settings from "./pages/Settings";
 import Monitoring from "./pages/Monitoring";
 import Bots from "./pages/Bots";
+import Brokers from "./pages/Brokers";
 import Copytraders from "./pages/Copytraders";
 import Auth from "./pages/Auth";
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/monitoring" element={<Monitoring />} />
             <Route path="/bots" element={<Bots />} />
+            <Route path="/brokers" element={<Brokers />} />
             <Route path="/copytraders" element={<Copytraders />} />
           </Routes>
         </AppLayout>
