@@ -9,6 +9,7 @@ import Settings from "./pages/Settings";
 import Monitoring from "./pages/Monitoring";
 import Bots from "./pages/Bots";
 import Copytraders from "./pages/Copytraders";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
       <BrowserRouter>
         <AppLayout>
           <Routes>
+            <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<Index />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/monitoring" element={<Monitoring />} />
