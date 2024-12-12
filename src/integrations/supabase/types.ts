@@ -697,6 +697,57 @@ export type Database = {
         }
         Relationships: []
       }
+      system_events: {
+        Row: {
+          created_at: string | null
+          event_description: string
+          event_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_description: string
+          event_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_description?: string
+          event_type?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      system_monitoring: {
+        Row: {
+          component_name: string
+          created_at: string | null
+          id: string
+          metrics: Json | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          component_name: string
+          created_at?: string | null
+          id?: string
+          metrics?: Json | null
+          status: string
+          user_id?: string | null
+        }
+        Update: {
+          component_name?: string
+          created_at?: string | null
+          id?: string
+          metrics?: Json | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ticket_transfers: {
         Row: {
           created_at: string
@@ -903,6 +954,39 @@ export type Database = {
           leverage?: number
           stop_loss?: number
           take_profit?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      trading_strategies: {
+        Row: {
+          configuration: Json | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          type: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          configuration?: Json | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          type?: string
+          updated_at?: string | null
           user_id?: string | null
         }
         Relationships: []

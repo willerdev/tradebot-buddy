@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { TradingStrategy } from "@/types/database";
 
 export function StrategySettings() {
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +23,7 @@ export function StrategySettings() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as TradingStrategy[];
     },
   });
 
