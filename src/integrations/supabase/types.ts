@@ -163,31 +163,40 @@ export type Database = {
       }
       copytraders: {
         Row: {
+          country: string
           created_at: string
           description: string | null
+          email: string
           id: string
           is_active: boolean | null
           performance_metrics: Json | null
+          phone_number: string
           trader_name: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          country: string
           created_at?: string
           description?: string | null
+          email: string
           id?: string
           is_active?: boolean | null
           performance_metrics?: Json | null
+          phone_number: string
           trader_name: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          country?: string
           created_at?: string
           description?: string | null
+          email?: string
           id?: string
           is_active?: boolean | null
           performance_metrics?: Json | null
+          phone_number?: string
           trader_name?: string
           updated_at?: string
           user_id?: string

@@ -16,6 +16,9 @@ import { Loader2, User, Users } from "lucide-react";
 const copytraderSchema = z.object({
   trader_name: z.string().min(2, "Trader name must be at least 2 characters"),
   description: z.string().optional(),
+  email: z.string().email("Invalid email address"),
+  phone_number: z.string().min(10, "Phone number must be at least 10 characters"),
+  country: z.string().min(2, "Country must be at least 2 characters"),
 });
 
 type CopytraderFormValues = z.infer<typeof copytraderSchema>;
@@ -28,6 +31,9 @@ export default function Copytraders() {
     defaultValues: {
       trader_name: "",
       description: "",
+      email: "",
+      phone_number: "",
+      country: "",
     },
   });
 
@@ -57,6 +63,9 @@ export default function Copytraders() {
         user_id: user.user.id,
         trader_name: values.trader_name,
         description: values.description,
+        email: values.email,
+        phone_number: values.phone_number,
+        country: values.country,
       });
 
       if (error) throw error;
@@ -118,6 +127,45 @@ export default function Copytraders() {
                 />
                 <FormField
                   control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input type="tel" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
@@ -157,6 +205,18 @@ export default function Copytraders() {
                 {trader.description || "No description provided"}
               </CardDescription>
               <div className="mt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Email</span>
+                  <span className="text-sm">{trader.email}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Phone</span>
+                  <span className="text-sm">{trader.phone_number}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-muted-foreground">Country</span>
+                  <span className="text-sm">{trader.country}</span>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Status</span>
                   <span className={`text-sm ${trader.is_active ? "text-green-500" : "text-red-500"}`}>
