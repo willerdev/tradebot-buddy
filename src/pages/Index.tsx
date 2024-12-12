@@ -1,29 +1,78 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, DollarSign, TrendingUp, Users } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Index() {
+  const { data: tradingStats } = useQuery({
+    queryKey: ["trading-stats"],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
+      const [tradingVolume, activeBots, brokerConnections, performance] = await Promise.all([
+        supabase
+          .from("bot_trades")
+          .select("entry_price, quantity")
+          .eq("user_id", user.user.id)
+          .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase
+          .from("trading_bots")
+          .select("*")
+          .eq("user_id", user.user.id)
+          .eq("status", "running"),
+        supabase
+          .from("broker_connections")
+          .select("*")
+          .eq("user_id", user.user.id)
+          .eq("is_active", true),
+        supabase
+          .from("bot_trades")
+          .select("pnl")
+          .eq("user_id", user.user.id)
+          .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+      ]);
+
+      const volume = tradingVolume.data?.reduce((acc, trade) => 
+        acc + (Number(trade.entry_price) * Number(trade.quantity)), 0) || 0;
+
+      const monthlyPnl = performance.data?.reduce((acc, trade) => 
+        acc + (Number(trade.pnl) || 0), 0) || 0;
+
+      const initialBalance = 10000; // Demo account initial balance
+      const monthlyReturn = initialBalance > 0 ? (monthlyPnl / initialBalance) * 100 : 0;
+
+      return {
+        volume,
+        activeBots: activeBots.data?.length || 0,
+        brokerConnections: brokerConnections.data?.length || 0,
+        monthlyReturn,
+      };
+    },
+  });
+
   const stats = [
     {
       title: "Total Trading Volume",
-      value: "$1.2M",
+      value: tradingStats ? `$${tradingStats.volume.toLocaleString()}` : "$0",
       description: "Last 30 days",
       icon: DollarSign,
     },
     {
       title: "Active Bots",
-      value: "12",
+      value: tradingStats?.activeBots.toString() || "0",
       description: "Currently running",
       icon: Activity,
     },
     {
       title: "Connected Brokers",
-      value: "3",
+      value: tradingStats?.brokerConnections.toString() || "0",
       description: "API integrations",
       icon: Users,
     },
     {
       title: "Performance",
-      value: "+15.4%",
+      value: tradingStats ? `${tradingStats.monthlyReturn.toFixed(2)}%` : "0%",
       description: "Monthly return",
       icon: TrendingUp,
     },

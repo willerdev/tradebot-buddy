@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Settings from "./pages/Settings";
 import Monitoring from "./pages/Monitoring";
 import Bots from "./pages/Bots";
+import Copytraders from "./pages/Copytraders";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/monitoring" element={<Monitoring />} />
             <Route path="/bots" element={<Bots />} />
+            <Route path="/copytraders" element={<Copytraders />} />
           </Routes>
         </AppLayout>
       </BrowserRouter>
