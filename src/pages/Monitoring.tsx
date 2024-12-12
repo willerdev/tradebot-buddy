@@ -6,7 +6,7 @@ import { SystemEvent, SystemMonitoring } from "@/types/database";
 import { format } from "date-fns";
 
 export default function Monitoring() {
-  const { data: monitoring } = useQuery({
+  const { data: monitoring } = useQuery<SystemMonitoring[]>({
     queryKey: ["system-monitoring"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -15,11 +15,11 @@ export default function Monitoring() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as SystemMonitoring[];
+      return data;
     },
   });
 
-  const { data: events } = useQuery({
+  const { data: events } = useQuery<SystemEvent[]>({
     queryKey: ["system-events"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -28,7 +28,7 @@ export default function Monitoring() {
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as SystemEvent[];
+      return data;
     },
   });
 
@@ -58,7 +58,7 @@ export default function Monitoring() {
             </CardHeader>
             <CardContent>
               <div className="text-xs text-muted-foreground">
-                {Object.entries(item.metrics as Record<string, number>).map(
+                {item.metrics && typeof item.metrics === 'object' && Object.entries(item.metrics as Record<string, number>).map(
                   ([key, value]) => (
                     <div key={key} className="flex justify-between mt-1">
                       <span>{key}:</span>

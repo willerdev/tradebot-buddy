@@ -11,7 +11,7 @@ export function StrategySettings() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const { data: strategies, refetch } = useQuery({
+  const { data: strategies, refetch } = useQuery<TradingStrategy[]>({
     queryKey: ["trading-strategies"],
     queryFn: async () => {
       const { data: user } = await supabase.auth.getUser();
@@ -20,10 +20,11 @@ export function StrategySettings() {
       const { data, error } = await supabase
         .from("trading_strategies")
         .select("*")
+        .eq('user_id', user.user.id)
         .order("created_at", { ascending: false });
       
       if (error) throw error;
-      return data as TradingStrategy[];
+      return data;
     },
   });
 
@@ -48,6 +49,7 @@ export function StrategySettings() {
       });
       refetch();
     } catch (error) {
+      console.error('Error adding strategy:', error);
       toast({
         title: "Error",
         description: "Failed to add strategy. Please try again.",
