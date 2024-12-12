@@ -1,56 +1,46 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Monitoring() {
-  const systemStatus = [
-    {
-      title: "Trading Engine",
-      status: "Operational",
-      icon: CheckCircle2,
-      color: "text-green-500",
+  const { data: systemStatus } = useQuery({
+    queryKey: ["system-monitoring"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("system_monitoring")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data;
     },
-    {
-      title: "Market Data Feed",
-      status: "Operational",
-      icon: CheckCircle2,
-      color: "text-green-500",
-    },
-    {
-      title: "Order Processing",
-      status: "Degraded Performance",
-      icon: AlertTriangle,
-      color: "text-yellow-500",
-    },
-    {
-      title: "Bot Execution",
-      status: "Operational",
-      icon: CheckCircle2,
-      color: "text-green-500",
-    },
-  ];
+  });
 
-  const recentEvents = [
-    {
-      timestamp: "2024-03-20 14:30:00",
-      event: "Bot #123 Trade Executed",
-      type: "success",
+  const { data: recentEvents } = useQuery({
+    queryKey: ["system-events"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("system_events")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(4);
+      
+      if (error) throw error;
+      return data;
     },
-    {
-      timestamp: "2024-03-20 14:28:00",
-      event: "Market Data Latency Spike",
-      type: "warning",
-    },
-    {
-      timestamp: "2024-03-20 14:25:00",
-      event: "New Strategy Deployed",
-      type: "info",
-    },
-    {
-      timestamp: "2024-03-20 14:20:00",
-      event: "System Backup Completed",
-      type: "success",
-    },
-  ];
+  });
+
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "operational":
+        return { icon: CheckCircle2, color: "text-green-500" };
+      case "degraded performance":
+        return { icon: AlertTriangle, color: "text-yellow-500" };
+      default:
+        return { icon: Activity, color: "text-red-500" };
+    }
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-8 animate-fade-up">
@@ -62,18 +52,18 @@ export default function Monitoring() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {systemStatus.map((status) => {
-          const Icon = status.icon;
+        {systemStatus?.map((status) => {
+          const { icon: Icon, color } = getStatusIcon(status.status);
           return (
-            <Card key={status.title}>
+            <Card key={status.id}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {status.title}
+                  {status.component_name}
                 </CardTitle>
-                <Icon className={`h-4 w-4 ${status.color}`} />
+                <Icon className={`h-4 w-4 ${color}`} />
               </CardHeader>
               <CardContent>
-                <div className={`text-lg font-semibold ${status.color}`}>
+                <div className={`text-lg font-semibold ${color}`}>
                   {status.status}
                 </div>
               </CardContent>
@@ -90,16 +80,16 @@ export default function Monitoring() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentEvents.map((event, index) => (
+              {recentEvents?.map((event) => (
                 <div
-                  key={index}
+                  key={event.id}
                   className="flex items-center gap-4 text-sm border-b last:border-0 pb-2"
                 >
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="font-medium">{event.event}</p>
+                    <p className="font-medium">{event.event_description}</p>
                     <p className="text-xs text-muted-foreground">
-                      {event.timestamp}
+                      {new Date(event.created_at).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -115,22 +105,15 @@ export default function Monitoring() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">CPU Usage</span>
-                <span className="text-sm font-medium">45%</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Memory Usage</span>
-                <span className="text-sm font-medium">2.4 GB</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Network Latency</span>
-                <span className="text-sm font-medium">124ms</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Active Connections</span>
-                <span className="text-sm font-medium">47</span>
-              </div>
+              {systemStatus?.[0]?.metrics && Object.entries(systemStatus[0].metrics).map(([key, value]) => (
+                <div key={key} className="flex justify-between items-center">
+                  <span className="text-sm capitalize">{key.replace(/_/g, ' ')}</span>
+                  <span className="text-sm font-medium">
+                    {typeof value === 'number' ? value.toString() : value}
+                    {key.includes('usage') ? '%' : ''}
+                  </span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
