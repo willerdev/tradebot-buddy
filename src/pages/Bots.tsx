@@ -6,6 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 interface TradingBot {
   id: string;
@@ -24,10 +29,48 @@ interface TradingBot {
   };
 }
 
+interface BotFormData {
+  name: string;
+  trading_pair: string;
+  timeframe: string;
+  take_profit: number;
+  stop_loss: number;
+  lot_size: number;
+  trade_amount: number;
+}
+
+const TIMEFRAMES = [
+  { value: "1h", label: "1 Hour" },
+  { value: "2h", label: "2 Hours" },
+  { value: "4h", label: "4 Hours" },
+  { value: "1d", label: "1 Day" },
+  { value: "1w", label: "1 Week" },
+  { value: "1M", label: "1 Month" },
+];
+
+const TRADING_PAIRS = [
+  "BTC/USDT",
+  "ETH/USDT",
+  "BNB/USDT",
+  "SOL/USDT",
+  "XRP/USDT",
+];
+
 export default function Bots() {
   const { startBot, stopBot } = useBotManagement();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(false);
+  const [editingBot, setEditingBot] = useState<TradingBot | null>(null);
+  const [formData, setFormData] = useState<BotFormData>({
+    name: "",
+    trading_pair: "BTC/USDT",
+    timeframe: "1h",
+    take_profit: 2.0,
+    stop_loss: 1.0,
+    lot_size: 1.0,
+    trade_amount: 100.0,
+  });
 
   const { data: bots, refetch } = useQuery({
     queryKey: ["trading-bots"],
@@ -46,36 +89,61 @@ export default function Bots() {
     },
   });
 
-  const handleAddBot = async () => {
+  const handleSubmit = async () => {
     try {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
-      const { error } = await supabase.from("trading_bots").insert({
-        user_id: user.user.id,
-        name: `Bot ${(bots?.length || 0) + 1}`,
-        strategy: "Moving Average Crossover",
-        status: "stopped",
-        trading_pair: "BTC/USDT", // Default trading pair
-        timeframe: "1h", // Default timeframe
-        take_profit: 2.0, // Default take profit percentage
-        stop_loss: 1.0, // Default stop loss percentage
-        lot_size: 1.0, // Default lot size
-        trade_amount: 100.0 // Default trade amount
-      });
+      if (editingBot) {
+        // Update existing bot
+        const { error } = await supabase
+          .from("trading_bots")
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", editingBot.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Bot Added",
-        description: "New trading bot has been created successfully.",
+        toast({
+          title: "Bot Updated",
+          description: "Trading bot has been updated successfully.",
+        });
+      } else {
+        // Create new bot
+        const { error } = await supabase.from("trading_bots").insert({
+          ...formData,
+          user_id: user.user.id,
+          strategy: "Moving Average Crossover",
+          status: "stopped",
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: "Bot Added",
+          description: "New trading bot has been created successfully.",
+        });
+      }
+
+      setIsOpen(false);
+      setEditingBot(null);
+      setFormData({
+        name: "",
+        trading_pair: "BTC/USDT",
+        timeframe: "1h",
+        take_profit: 2.0,
+        stop_loss: 1.0,
+        lot_size: 1.0,
+        trade_amount: 100.0,
       });
       refetch();
     } catch (error) {
-      console.error("Error adding bot:", error);
+      console.error("Error managing bot:", error);
       toast({
         title: "Error",
-        description: "Failed to add bot. Please try again.",
+        description: "Failed to manage bot. Please try again.",
         variant: "destructive",
       });
     }
@@ -104,6 +172,20 @@ export default function Bots() {
     }
   };
 
+  const handleEditBot = (bot: TradingBot) => {
+    setEditingBot(bot);
+    setFormData({
+      name: bot.name,
+      trading_pair: bot.trading_pair,
+      timeframe: bot.timeframe,
+      take_profit: bot.take_profit,
+      stop_loss: bot.stop_loss,
+      lot_size: bot.lot_size,
+      trade_amount: bot.trade_amount,
+    });
+    setIsOpen(true);
+  };
+
   return (
     <div className="container mx-auto py-6 space-y-8 animate-fade-up">
       <div className="flex justify-between items-center">
@@ -113,10 +195,111 @@ export default function Bots() {
             Manage and monitor your trading bots
           </p>
         </div>
-        <Button onClick={handleAddBot}>
-          <Plus className="mr-2 h-4 w-4" />
-          {!isMobile && "Create New Bot"}
-        </Button>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => {
+              setEditingBot(null);
+              setFormData({
+                name: "",
+                trading_pair: "BTC/USDT",
+                timeframe: "1h",
+                take_profit: 2.0,
+                stop_loss: 1.0,
+                lot_size: 1.0,
+                trade_amount: 100.0,
+              });
+            }}>
+              <Plus className="mr-2 h-4 w-4" />
+              {!isMobile && "Create New Bot"}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{editingBot ? "Edit Bot" : "Create New Bot"}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Bot Name</Label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Enter bot name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Trading Pair</Label>
+                <Select
+                  value={formData.trading_pair}
+                  onValueChange={(value) => setFormData({ ...formData, trading_pair: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select trading pair" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TRADING_PAIRS.map((pair) => (
+                      <SelectItem key={pair} value={pair}>
+                        {pair}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Timeframe</Label>
+                <Select
+                  value={formData.timeframe}
+                  onValueChange={(value) => setFormData({ ...formData, timeframe: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select timeframe" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIMEFRAMES.map((tf) => (
+                      <SelectItem key={tf.value} value={tf.value}>
+                        {tf.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Take Profit (%)</Label>
+                <Input
+                  type="number"
+                  value={formData.take_profit}
+                  onChange={(e) => setFormData({ ...formData, take_profit: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Stop Loss (%)</Label>
+                <Input
+                  type="number"
+                  value={formData.stop_loss}
+                  onChange={(e) => setFormData({ ...formData, stop_loss: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Lot Size</Label>
+                <Input
+                  type="number"
+                  value={formData.lot_size}
+                  onChange={(e) => setFormData({ ...formData, lot_size: parseFloat(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Trade Amount</Label>
+                <Input
+                  type="number"
+                  value={formData.trade_amount}
+                  onChange={(e) => setFormData({ ...formData, trade_amount: parseFloat(e.target.value) })}
+                />
+              </div>
+              <Button className="w-full" onClick={handleSubmit}>
+                {editingBot ? "Update Bot" : "Create Bot"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -142,7 +325,11 @@ export default function Bots() {
                     <Play className="h-4 w-4 text-green-500" />
                   </Button>
                 )}
-                <Button variant="outline" size="icon">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => handleEditBot(bot)}
+                >
                   <Settings className="h-4 w-4" />
                 </Button>
                 <Button 
@@ -167,6 +354,14 @@ export default function Bots() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Timeframe</span>
                   <span className="text-sm font-medium">{bot.timeframe}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Take Profit</span>
+                  <span className="text-sm font-medium">{bot.take_profit}%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Stop Loss</span>
+                  <span className="text-sm font-medium">{bot.stop_loss}%</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Status</span>
