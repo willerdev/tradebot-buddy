@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 const menuItems = [
-  { title: "Dashboard", icon: LineChart, path: "/" },
+  { title: "Dashboard", icon: LineChart, path: "/dashboard" }, // Changed from "/" to "/dashboard"
   { title: "Bots", icon: Bot, path: "/bots" },
   { title: "Monitor", icon: Activity, path: "/monitoring" },
   { title: "Traders", icon: Users, path: "/copytraders" },

@@ -4,15 +4,15 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
 const menuItems = [
-  { title: "Dashboard", icon: LineChart, path: "/" },
+  { title: "Dashboard", icon: LineChart, path: "/dashboard" }, // Changed from "/" to "/dashboard"
   { title: "Active Bots", icon: Bot, path: "/bots" },
   { title: "Monitoring", icon: Activity, path: "/monitoring" },
   { title: "Copytraders", icon: Users, path: "/copytraders" },
