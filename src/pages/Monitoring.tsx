@@ -9,9 +9,13 @@ export default function Monitoring() {
   const { data: monitoring } = useQuery<SystemMonitoring[]>({
     queryKey: ["system-monitoring"],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("system_monitoring")
         .select("*")
+        .eq('user_id', user.user.id)
         .order("created_at", { ascending: false });
       
       if (error) throw error;
@@ -22,9 +26,13 @@ export default function Monitoring() {
   const { data: events } = useQuery<SystemEvent[]>({
     queryKey: ["system-events"],
     queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("system_events")
         .select("*")
+        .eq('user_id', user.user.id)
         .order("created_at", { ascending: false });
       
       if (error) throw error;
