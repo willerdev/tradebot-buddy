@@ -12,6 +12,12 @@ interface TradingBot {
   name: string;
   strategy: string;
   status: string;
+  trading_pair: string;
+  timeframe: string;
+  take_profit: number;
+  stop_loss: number;
+  lot_size: number;
+  trade_amount: number;
   performance_metrics: {
     total_pnl?: number;
     [key: string]: any;
@@ -50,6 +56,12 @@ export default function Bots() {
         name: `Bot ${(bots?.length || 0) + 1}`,
         strategy: "Moving Average Crossover",
         status: "stopped",
+        trading_pair: "BTC/USDT", // Default trading pair
+        timeframe: "1h", // Default timeframe
+        take_profit: 2.0, // Default take profit percentage
+        stop_loss: 1.0, // Default stop loss percentage
+        lot_size: 1.0, // Default lot size
+        trade_amount: 100.0 // Default trade amount
       });
 
       if (error) throw error;
@@ -60,6 +72,7 @@ export default function Bots() {
       });
       refetch();
     } catch (error) {
+      console.error("Error adding bot:", error);
       toast({
         title: "Error",
         description: "Failed to add bot. Please try again.",
@@ -146,6 +159,14 @@ export default function Bots() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Strategy</span>
                   <span className="text-sm font-medium">{bot.strategy}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Trading Pair</span>
+                  <span className="text-sm font-medium">{bot.trading_pair}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Timeframe</span>
+                  <span className="text-sm font-medium">{bot.timeframe}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Status</span>

@@ -852,10 +852,16 @@ export type Database = {
           created_at: string
           id: string
           last_error: string | null
+          lot_size: number
           name: string
           performance_metrics: Json | null
           status: string | null
+          stop_loss: number
           strategy: string
+          take_profit: number
+          timeframe: string
+          trade_amount: number
+          trading_pair: string
           updated_at: string
           user_id: string
         }
@@ -865,10 +871,16 @@ export type Database = {
           created_at?: string
           id?: string
           last_error?: string | null
+          lot_size: number
           name: string
           performance_metrics?: Json | null
           status?: string | null
+          stop_loss: number
           strategy: string
+          take_profit: number
+          timeframe: string
+          trade_amount: number
+          trading_pair: string
           updated_at?: string
           user_id: string
         }
@@ -878,10 +890,16 @@ export type Database = {
           created_at?: string
           id?: string
           last_error?: string | null
+          lot_size?: number
           name?: string
           performance_metrics?: Json | null
           status?: string | null
+          stop_loss?: number
           strategy?: string
+          take_profit?: number
+          timeframe?: string
+          trade_amount?: number
+          trading_pair?: string
           updated_at?: string
           user_id?: string
         }
