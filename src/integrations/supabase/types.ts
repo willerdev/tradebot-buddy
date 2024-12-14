@@ -27,6 +27,70 @@ export type Database = {
         }
         Relationships: []
       }
+      arbitrage_opportunities: {
+        Row: {
+          buy_broker_id: string
+          buy_price: number
+          contract_bot_id: string
+          created_at: string
+          executed_at: string | null
+          id: string
+          profit_percentage: number
+          sell_broker_id: string
+          sell_price: number
+          status: string | null
+          trading_pair: string
+        }
+        Insert: {
+          buy_broker_id: string
+          buy_price: number
+          contract_bot_id: string
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          profit_percentage: number
+          sell_broker_id: string
+          sell_price: number
+          status?: string | null
+          trading_pair: string
+        }
+        Update: {
+          buy_broker_id?: string
+          buy_price?: number
+          contract_bot_id?: string
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          profit_percentage?: number
+          sell_broker_id?: string
+          sell_price?: number
+          status?: string | null
+          trading_pair?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arbitrage_opportunities_buy_broker_id_fkey"
+            columns: ["buy_broker_id"]
+            isOneToOne: false
+            referencedRelation: "broker_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arbitrage_opportunities_contract_bot_id_fkey"
+            columns: ["contract_bot_id"]
+            isOneToOne: false
+            referencedRelation: "contract_bots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arbitrage_opportunities_sell_broker_id_fkey"
+            columns: ["sell_broker_id"]
+            isOneToOne: false
+            referencedRelation: "broker_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bot_trades: {
         Row: {
           bot_id: string
@@ -160,6 +224,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contract_bots: {
+        Row: {
+          created_at: string
+          id: string
+          last_check_at: string | null
+          last_error: string | null
+          min_profit_percentage: number | null
+          name: string
+          status: string | null
+          trading_pair: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_check_at?: string | null
+          last_error?: string | null
+          min_profit_percentage?: number | null
+          name: string
+          status?: string | null
+          trading_pair: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_check_at?: string | null
+          last_error?: string | null
+          min_profit_percentage?: number | null
+          name?: string
+          status?: string | null
+          trading_pair?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       copytraders: {
         Row: {
