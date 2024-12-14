@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Play, Power, Trash } from "lucide-react";
 import { useContractBotManagement } from "@/hooks/use-contract-bot-management";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { BotActions } from "./BotActions";
+import { BotDetails } from "./BotDetails";
+import { BotStatus } from "./BotStatus";
 
 interface ContractBotCardProps {
   bot: {
@@ -20,10 +20,9 @@ interface ContractBotCardProps {
 }
 
 export function ContractBotCard({ bot }: ContractBotCardProps) {
-  const { startBot, stopBot } = useContractBotManagement();
+  const { stopBot } = useContractBotManagement();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const handleDelete = async () => {
     try {
@@ -49,66 +48,28 @@ export function ContractBotCard({ bot }: ContractBotCardProps) {
     }
   };
 
-  const handleStart = () => {
-    navigate(`/terminal/${bot.id}`);
-  };
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-xl font-bold">{bot.name}</CardTitle>
-        <div className="flex items-center gap-2">
-          {bot.status === "running" ? (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => stopBot(bot.id)}
-            >
-              <Power className="h-4 w-4 text-red-500" />
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={handleStart}
-            >
-              <Play className="h-4 w-4 text-green-500" />
-            </Button>
-          )}
-          <Button 
-            variant="outline" 
-            size="icon"
-            onClick={handleDelete}
-          >
-            <Trash className="h-4 w-4 text-red-500" />
-          </Button>
-        </div>
+        <BotActions
+          botId={bot.id}
+          status={bot.status}
+          onStop={stopBot}
+          onDelete={handleDelete}
+        />
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Trading Pair</span>
-            <span className="text-sm font-medium">{bot.trading_pair}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Min Profit</span>
-            <span className="text-sm font-medium">{bot.min_profit_percentage}%</span>
-          </div>
+          <BotDetails
+            tradingPair={bot.trading_pair}
+            minProfitPercentage={bot.min_profit_percentage}
+            lastError={bot.last_error}
+          />
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Status</span>
-            <span
-              className={`text-sm font-medium ${
-                bot.status === "running" ? "text-green-500" : "text-yellow-500"
-              }`}
-            >
-              {bot.status.charAt(0).toUpperCase() + bot.status.slice(1)}
-            </span>
+            <BotStatus status={bot.status} />
           </div>
-          {bot.last_error && (
-            <div className="text-sm text-red-500">
-              Last Error: {bot.last_error}
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
