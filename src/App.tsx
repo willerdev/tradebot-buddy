@@ -11,6 +11,7 @@ import Bots from "./pages/Bots";
 import Brokers from "./pages/Brokers";
 import Copytraders from "./pages/Copytraders";
 import Contract from "./pages/Contract";
+import Terminal from "./pages/Terminal";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/brokers" element={<Brokers />} />
             <Route path="/copytraders" element={<Copytraders />} />
             <Route path="/contract" element={<Contract />} />
+            <Route path="/terminal/:botId" element={<Terminal />} />
           </Route>
         </Routes>
       </BrowserRouter>

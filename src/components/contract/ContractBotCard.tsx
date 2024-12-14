@@ -5,6 +5,7 @@ import { useContractBotManagement } from "@/hooks/use-contract-bot-management";
 import { useToast } from "@/components/ui/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface ContractBotCardProps {
   bot: {
@@ -22,6 +23,7 @@ export function ContractBotCard({ bot }: ContractBotCardProps) {
   const { startBot, stopBot } = useContractBotManagement();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const handleDelete = async () => {
     try {
@@ -47,6 +49,10 @@ export function ContractBotCard({ bot }: ContractBotCardProps) {
     }
   };
 
+  const handleStart = () => {
+    navigate(`/terminal/${bot.id}`);
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -64,7 +70,7 @@ export function ContractBotCard({ bot }: ContractBotCardProps) {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => startBot(bot.id)}
+              onClick={handleStart}
             >
               <Play className="h-4 w-4 text-green-500" />
             </Button>
