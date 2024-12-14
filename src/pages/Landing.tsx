@@ -59,14 +59,8 @@ export default function Landing() {
           MuraFx
         </div>
         <div className="flex items-center gap-4">
-          <Link to="/auth" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+          <Link to="/auth" className="text-sm px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
             Login
-          </Link>
-          <Link 
-            to="/auth" 
-            className="text-sm px-4 py-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Sign Up
           </Link>
         </div>
       </nav>

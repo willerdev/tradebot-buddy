@@ -2,8 +2,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Activity, DollarSign, TrendingUp, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function Index() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      navigate("/auth");
+    }
+  };
+
   const { data: tradingStats } = useQuery({
     queryKey: ["trading-stats"],
     queryFn: async () => {
@@ -39,7 +58,7 @@ export default function Index() {
       const monthlyPnl = performance.data?.reduce((acc, trade) => 
         acc + (Number(trade.pnl) || 0), 0) || 0;
 
-      const initialBalance = 10000; // Demo account initial balance
+      const initialBalance = 10000;
       const monthlyReturn = initialBalance > 0 ? (monthlyPnl / initialBalance) * 100 : 0;
 
       return {
@@ -80,11 +99,16 @@ export default function Index() {
 
   return (
     <div className="container mx-auto py-6 space-y-8 animate-fade-up">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome to your trading dashboard. Monitor your performance and manage your trading bots.
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome to your trading dashboard. Monitor your performance and manage your trading bots.
+          </p>
+        </div>
+        <Button variant="outline" onClick={handleLogout}>
+          Logout
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
