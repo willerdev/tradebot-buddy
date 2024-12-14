@@ -1,4 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { AccountSettings } from "@/components/settings/AccountSettings";
 import { StrategySettings } from "@/components/settings/StrategySettings";
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
@@ -15,6 +17,14 @@ export default function Settings() {
         <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground">Manage your account preferences and trading settings.</p>
       </div>
+
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Contract Bots Integration</AlertTitle>
+        <AlertDescription>
+          Contract bots are currently integrated but not fully functional due to missing API configurations.
+        </AlertDescription>
+      </Alert>
 
       <Tabs defaultValue="account" className="w-full">
         <TabsList className="w-full justify-start">
