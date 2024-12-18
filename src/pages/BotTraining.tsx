@@ -5,14 +5,40 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const strategies = ["Moving Average", "RSI", "MACD", "Bollinger Bands"];
+const tradingPairs = ["EUR/USD", "BTC/USD", "ETH/USD", "GBP/USD"];
+const durations = ["1 Day", "1 Week", "1 Month", "3 Months"];
 
 export default function BotTraining() {
   const [output, setOutput] = useState<Array<{ text: string; isLoss?: boolean }>>([]);
   const [isSimulating, setIsSimulating] = useState(false);
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0]);
   const [simulationInterval, setSimulationInterval] = useState<NodeJS.Timeout | null>(null);
+  const [showConfig, setShowConfig] = useState(false);
+  const [config, setConfig] = useState({
+    amount: "800",
+    pair: "EUR/USD",
+    strategy: strategies[0],
+    duration: durations[0]
+  });
+  
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -24,6 +50,14 @@ export default function BotTraining() {
     setIsSimulating(false);
   }, [simulationInterval]);
 
+  useEffect(() => {
+    return () => {
+      if (simulationInterval) {
+        clearInterval(simulationInterval);
+      }
+    };
+  }, [simulationInterval]);
+
   const simulateBacktest = useCallback(async () => {
     if (isSimulating) return;
     
@@ -32,9 +66,9 @@ export default function BotTraining() {
     
     const commands = [
       { text: "Initializing backtesting environment..." },
-      { text: `Loading historical data for EUR/USD using ${selectedStrategy}...` },
+      { text: `Loading historical data for ${config.pair} using ${config.strategy}...` },
       { text: "Setting up bot configuration..." },
-      { text: "Starting simulation with $800 stake..." },
+      { text: `Starting simulation with $${config.amount} stake...` },
     ];
 
     // Simulate initial commands
@@ -49,11 +83,11 @@ export default function BotTraining() {
         id: Date.now(),
         type: Math.random() > 0.5 ? "BUY" : "SELL",
         profit: profit.toFixed(2),
-        balance: (800 + profit).toFixed(2)
+        balance: (Number(config.amount) + profit).toFixed(2)
       };
       
       setOutput(prev => [...prev, 
-        { text: `Trade #${trade.id}: ${trade.type} EUR/USD` },
+        { text: `Trade #${trade.id}: ${trade.type} ${config.pair}` },
         { text: `Profit/Loss: $${trade.profit}`, isLoss: profit < 0 },
         { text: `Current Balance: $${trade.balance}` },
         { text: "---" }
@@ -61,9 +95,9 @@ export default function BotTraining() {
 
       try {
         const { error } = await supabase.from('bot_training_results').insert([{
-          bot_name: "EUR/USD Backtest Bot",
-          trading_pair: "EUR/USD",
-          stake_amount: 800,
+          bot_name: `${config.strategy} Bot`,
+          trading_pair: config.pair,
+          stake_amount: Number(config.amount),
           start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
           end_date: new Date().toISOString(),
           total_trades: 1,
@@ -84,15 +118,7 @@ export default function BotTraining() {
     }, 2000);
 
     setSimulationInterval(interval);
-  }, [isSimulating, selectedStrategy, toast]);
-
-  useEffect(() => {
-    return () => {
-      if (simulationInterval) {
-        clearInterval(simulationInterval);
-      }
-    };
-  }, [simulationInterval]);
+  }, [isSimulating, config, toast]);
 
   if (isMobile) {
     return (
@@ -118,17 +144,94 @@ export default function BotTraining() {
           </p>
         </div>
         <div className="flex gap-4">
-          <select
-            className="border rounded-md px-3 py-2"
-            value={selectedStrategy}
-            onChange={(e) => setSelectedStrategy(e.target.value)}
-          >
-            {strategies.map((strategy) => (
-              <option key={strategy} value={strategy}>
-                {strategy}
-              </option>
-            ))}
-          </select>
+          <Dialog open={showConfig} onOpenChange={setShowConfig}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Configure Bot</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Configure Trading Bot</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="amount">Trading Amount ($)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    value={config.amount}
+                    onChange={(e) => setConfig(prev => ({ ...prev, amount: e.target.value }))}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Trading Pair</Label>
+                  <Select 
+                    value={config.pair} 
+                    onValueChange={(value) => setConfig(prev => ({ ...prev, pair: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tradingPairs.map((pair) => (
+                        <SelectItem key={pair} value={pair}>
+                          {pair}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Strategy</Label>
+                  <Select 
+                    value={config.strategy} 
+                    onValueChange={(value) => setConfig(prev => ({ ...prev, strategy: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {strategies.map((strategy) => (
+                        <SelectItem key={strategy} value={strategy}>
+                          {strategy}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Duration</Label>
+                  <Select 
+                    value={config.duration} 
+                    onValueChange={(value) => setConfig(prev => ({ ...prev, duration: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {durations.map((duration) => (
+                        <SelectItem key={duration} value={duration}>
+                          {duration}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-4">
+                <Button variant="outline" onClick={() => setShowConfig(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowConfig(false);
+                    simulateBacktest();
+                  }}
+                >
+                  Start Simulation
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Button
             variant="destructive"
             onClick={stopSimulation}
