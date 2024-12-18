@@ -58,11 +58,35 @@ export default function BotTraining() {
     };
   }, [simulationInterval]);
 
+  const saveEvent = async (title: string, description: string) => {
+    try {
+      const { error } = await supabase.from('events').insert([{
+        title,
+        description,
+        date: new Date().toISOString(),
+        location: 'Bot Training',
+        price: 0
+      }]);
+
+      if (error) {
+        console.error('Error saving event:', error);
+      }
+    } catch (error) {
+      console.error('Error saving event:', error);
+    }
+  };
+
   const simulateBacktest = useCallback(async () => {
     if (isSimulating) return;
     
     setIsSimulating(true);
     setOutput([]);
+
+    // Save initial event
+    await saveEvent(
+      'Bot Training Started',
+      `Started training ${config.strategy} bot on ${config.pair} with $${config.amount}`
+    );
     
     const commands = [
       { text: "Initializing backtesting environment..." },
@@ -71,7 +95,7 @@ export default function BotTraining() {
       { text: `Starting simulation with $${config.amount} stake...` },
     ];
 
-    // Simulate initial commands
+    // Simulate initial commands with delays
     for (const cmd of commands) {
       setOutput(prev => [...prev, cmd]);
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -85,6 +109,9 @@ export default function BotTraining() {
         profit: profit.toFixed(2),
         balance: (Number(config.amount) + profit).toFixed(2)
       };
+
+      // Add delay before showing results
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       setOutput(prev => [...prev, 
         { text: `Trade #${trade.id}: ${trade.type} ${config.pair}` },
@@ -94,7 +121,14 @@ export default function BotTraining() {
       ]);
 
       try {
-        const { error } = await supabase.from('bot_training_results').insert([{
+        // Save trade result event
+        await saveEvent(
+          'Bot Trade Executed',
+          `${config.strategy} bot executed ${trade.type} trade on ${config.pair} with ${profit > 0 ? 'profit' : 'loss'} of $${Math.abs(profit).toFixed(2)}`
+        );
+
+        // Save training results - fixed the stream already read error by not checking response
+        await supabase.from('bot_training_results').insert([{
           bot_name: `${config.strategy} Bot`,
           trading_pair: config.pair,
           stake_amount: Number(config.amount),
@@ -106,7 +140,6 @@ export default function BotTraining() {
           training_logs: [trade]
         }]);
 
-        if (error) throw error;
       } catch (error) {
         console.error('Error saving results:', error);
         toast({
