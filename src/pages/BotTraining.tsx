@@ -79,6 +79,18 @@ export default function BotTraining() {
   const simulateBacktest = useCallback(async () => {
     if (isSimulating) return;
     
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to run simulations.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSimulating(true);
     setOutput([]);
 
@@ -102,7 +114,7 @@ export default function BotTraining() {
     }
 
     const interval = setInterval(async () => {
-      const profit = (Math.random() * 40) - 20; // Random profit/loss between -20 and 20
+      const profit = (Math.random() * 40) - 20;
       const trade = {
         id: Date.now(),
         type: Math.random() > 0.5 ? "BUY" : "SELL",
@@ -127,8 +139,9 @@ export default function BotTraining() {
           `${config.strategy} bot executed ${trade.type} trade on ${config.pair} with ${profit > 0 ? 'profit' : 'loss'} of $${Math.abs(profit).toFixed(2)}`
         );
 
-        // Save training results - fixed the stream already read error by not checking response
+        // Save training results with user_id
         await supabase.from('bot_training_results').insert([{
+          user_id: user.id, // Add user_id here
           bot_name: `${config.strategy} Bot`,
           trading_pair: config.pair,
           stake_amount: Number(config.amount),
