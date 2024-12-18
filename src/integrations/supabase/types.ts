@@ -147,6 +147,51 @@ export type Database = {
           },
         ]
       }
+      bot_training_results: {
+        Row: {
+          bot_name: string
+          created_at: string
+          end_date: string
+          id: string
+          profit_loss: number | null
+          stake_amount: number
+          start_date: string
+          total_trades: number
+          trading_pair: string
+          training_logs: Json | null
+          user_id: string | null
+          win_rate: number | null
+        }
+        Insert: {
+          bot_name: string
+          created_at?: string
+          end_date: string
+          id?: string
+          profit_loss?: number | null
+          stake_amount: number
+          start_date: string
+          total_trades?: number
+          trading_pair: string
+          training_logs?: Json | null
+          user_id?: string | null
+          win_rate?: number | null
+        }
+        Update: {
+          bot_name?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          profit_loss?: number | null
+          stake_amount?: number
+          start_date?: string
+          total_trades?: number
+          trading_pair?: string
+          training_logs?: Json | null
+          user_id?: string | null
+          win_rate?: number | null
+        }
+        Relationships: []
+      }
       broker_connections: {
         Row: {
           api_key: string

@@ -14,6 +14,7 @@ import Contract from "./pages/Contract";
 import Terminal from "./pages/Terminal";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
+import BotTraining from "./pages/BotTraining";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/copytraders" element={<Copytraders />} />
             <Route path="/contract" element={<Contract />} />
             <Route path="/terminal/:botId" element={<Terminal />} />
+            <Route path="/bot-training" element={<BotTraining />} />
           </Route>
         </Routes>
       </BrowserRouter>

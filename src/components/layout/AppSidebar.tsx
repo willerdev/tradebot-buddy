@@ -1,4 +1,4 @@
-import { Activity, Bot, LineChart, Settings, Users, Wallet, GitCompare } from "lucide-react";
+import { Activity, Bot, LineChart, Settings, Users, Wallet, GitCompare, Terminal } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
@@ -15,6 +15,7 @@ const menuItems = [
   { title: "Dashboard", icon: LineChart, path: "/dashboard" },
   { title: "Active Bots", icon: Bot, path: "/bots" },
   { title: "Contract Bots", icon: GitCompare, path: "/contract" },
+  { title: "Bot Training", icon: Terminal, path: "/bot-training" },
   { title: "Monitoring", icon: Activity, path: "/monitoring" },
   { title: "Copytraders", icon: Users, path: "/copytraders" },
   { title: "Brokers", icon: Wallet, path: "/brokers" },
