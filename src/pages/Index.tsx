@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, DollarSign, TrendingUp, Users } from "lucide-react";
+import { Activity, DollarSign, TrendingUp, Users, Wallet } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,7 @@ export default function Index() {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
-      const [tradingVolume, activeBots, brokerConnections, performance] = await Promise.all([
+      const [tradingVolume, activeBots, brokerConnections, performance, contracts] = await Promise.all([
         supabase
           .from("bot_trades")
           .select("entry_price, quantity")
@@ -50,6 +50,11 @@ export default function Index() {
           .select("pnl")
           .eq("user_id", user.user.id)
           .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
+        supabase
+          .from("contracts")
+          .select("capital, profit")
+          .eq("user_id", user.user.id)
+          .eq("status", "active"),
       ]);
 
       const volume = tradingVolume.data?.reduce((acc, trade) => 
@@ -57,6 +62,12 @@ export default function Index() {
 
       const monthlyPnl = performance.data?.reduce((acc, trade) => 
         acc + (Number(trade.pnl) || 0), 0) || 0;
+
+      const totalCapital = contracts.data?.reduce((acc, contract) => 
+        acc + Number(contract.capital), 0) || 0;
+
+      const totalProfit = contracts.data?.reduce((acc, contract) => 
+        acc + Number(contract.profit), 0) || 0;
 
       const initialBalance = 10000;
       const monthlyReturn = initialBalance > 0 ? (monthlyPnl / initialBalance) * 100 : 0;
@@ -66,6 +77,8 @@ export default function Index() {
         activeBots: activeBots.data?.length || 0,
         brokerConnections: brokerConnections.data?.length || 0,
         monthlyReturn,
+        totalCapital,
+        totalProfit,
       };
     },
   });
@@ -78,6 +91,18 @@ export default function Index() {
       icon: DollarSign,
     },
     {
+      title: "Contract Capital",
+      value: tradingStats ? `$${tradingStats.totalCapital.toLocaleString()}` : "$0",
+      description: "Active contracts",
+      icon: Wallet,
+    },
+    {
+      title: "Contract Profit",
+      value: tradingStats ? `$${tradingStats.totalProfit.toLocaleString()}` : "$0",
+      description: "Total profit",
+      icon: TrendingUp,
+    },
+    {
       title: "Active Bots",
       value: tradingStats?.activeBots.toString() || "0",
       description: "Currently running",
@@ -88,12 +113,6 @@ export default function Index() {
       value: tradingStats?.brokerConnections.toString() || "0",
       description: "API integrations",
       icon: Users,
-    },
-    {
-      title: "Performance",
-      value: tradingStats ? `${tradingStats.monthlyReturn.toFixed(2)}%` : "0%",
-      description: "Monthly return",
-      icon: TrendingUp,
     },
   ];
 
@@ -111,7 +130,7 @@ export default function Index() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (

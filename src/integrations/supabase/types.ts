@@ -717,6 +717,39 @@ export type Database = {
         }
         Relationships: []
       }
+      contracts: {
+        Row: {
+          capital: number
+          created_at: string | null
+          end_date: string | null
+          id: string
+          profit: number
+          start_date: string | null
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          capital?: number
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          profit?: number
+          start_date?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          capital?: number
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          profit?: number
+          start_date?: string | null
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       copytraders: {
         Row: {
           country: string
