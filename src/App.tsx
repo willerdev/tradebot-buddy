@@ -15,6 +15,8 @@ import Terminal from "./pages/Terminal";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import BotTraining from "./pages/BotTraining";
+import Deposit from "./pages/Deposit";
+import Withdraw from "./pages/Withdraw";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,8 @@ const App = () => (
             <Route path="/contract" element={<Contract />} />
             <Route path="/terminal/:botId" element={<Terminal />} />
             <Route path="/bot-training" element={<BotTraining />} />
+            <Route path="/deposit" element={<Deposit />} />
+            <Route path="/withdraw" element={<Withdraw />} />
           </Route>
         </Routes>
       </BrowserRouter>
