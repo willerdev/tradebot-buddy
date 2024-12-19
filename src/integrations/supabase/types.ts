@@ -91,6 +91,414 @@ export type Database = {
           },
         ]
       }
+      b_beers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          status: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          status: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_beers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_chats: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          receiver_id: string | null
+          sender_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          receiver_id?: string | null
+          sender_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          receiver_id?: string | null
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_chats_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b_chats_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_friend_requests: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string | null
+          sender_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id?: string | null
+          sender_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string | null
+          sender_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_friend_requests_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b_friend_requests_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_friends: {
+        Row: {
+          created_at: string
+          friend_id: string | null
+          id: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          friend_id?: string | null
+          id?: string
+          status: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string | null
+          id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_friends_friend_id_fkey"
+            columns: ["friend_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b_friends_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_notifications: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "b_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b_post_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "b_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b_post_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_posts: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          images: string[] | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          images?: string[] | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          images?: string[] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_subcomment_likes: {
+        Row: {
+          created_at: string
+          id: string
+          subcomment_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          subcomment_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          subcomment_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_subcomment_likes_subcomment_id_fkey"
+            columns: ["subcomment_id"]
+            isOneToOne: false
+            referencedRelation: "b_subcomments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b_subcomment_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_subcomments: {
+        Row: {
+          comment_id: string | null
+          content: string
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          comment_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          comment_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b_subcomments_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "b_post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b_subcomments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "b_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b_users: {
+        Row: {
+          avatar_url: string | null
+          beer_preferences: string[] | null
+          created_at: string
+          full_name: string | null
+          id: string
+          is_visible: boolean | null
+          location: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          beer_preferences?: string[] | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          is_visible?: boolean | null
+          location?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          beer_preferences?: string[] | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_visible?: boolean | null
+          location?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
       bot_trades: {
         Row: {
           bot_id: string
