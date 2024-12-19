@@ -26,6 +26,7 @@ export default function Index() {
   const { data: tradingStats } = useQuery({
     queryKey: ["trading-stats"],
     queryFn: async () => {
+      console.log("Fetching trading stats...");
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
@@ -57,6 +58,8 @@ export default function Index() {
           .eq("status", "active"),
       ]);
 
+      console.log("Contracts data:", contracts);
+
       const volume = tradingVolume.data?.reduce((acc, trade) => 
         acc + (Number(trade.entry_price) * Number(trade.quantity)), 0) || 0;
 
@@ -69,14 +72,14 @@ export default function Index() {
       const totalProfit = contracts.data?.reduce((acc, contract) => 
         acc + Number(contract.profit), 0) || 0;
 
-      const initialBalance = 10000;
-      const monthlyReturn = initialBalance > 0 ? (monthlyPnl / initialBalance) * 100 : 0;
+      console.log("Total Capital:", totalCapital);
+      console.log("Total Profit:", totalProfit);
 
       return {
         volume,
         activeBots: activeBots.data?.length || 0,
         brokerConnections: brokerConnections.data?.length || 0,
-        monthlyReturn,
+        monthlyReturn: monthlyPnl,
         totalCapital,
         totalProfit,
       };
