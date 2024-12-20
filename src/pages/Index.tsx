@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -156,15 +157,7 @@ export default function Index() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Trades</CardTitle>
-            <CardDescription>Your last 5 trading activities</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No recent trades</p>
-          </CardContent>
-        </Card>
+        <TransactionHistory />
 
         <Card>
           <CardHeader>

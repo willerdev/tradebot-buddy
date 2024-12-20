@@ -5,8 +5,9 @@ import { AccountSettings } from "@/components/settings/AccountSettings";
 import { StrategySettings } from "@/components/settings/StrategySettings";
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
+import { TransactionSettings } from "@/components/settings/TransactionSettings";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { User, Palette, Shield, TrendingUp } from "lucide-react";
+import { User, Palette, Shield, TrendingUp, Wallet } from "lucide-react";
 
 export default function Settings() {
   const isMobile = useIsMobile();
@@ -36,6 +37,10 @@ export default function Settings() {
             <TrendingUp className="h-4 w-4" />
             {!isMobile && "Strategies"}
           </TabsTrigger>
+          <TabsTrigger value="transactions" className="flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            {!isMobile && "Transactions"}
+          </TabsTrigger>
           <TabsTrigger value="appearance" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
             {!isMobile && "Appearance"}
@@ -50,6 +55,9 @@ export default function Settings() {
         </TabsContent>
         <TabsContent value="strategies">
           <StrategySettings />
+        </TabsContent>
+        <TabsContent value="transactions">
+          <TransactionSettings />
         </TabsContent>
         <TabsContent value="appearance">
           <AppearanceSettings />
