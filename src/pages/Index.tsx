@@ -31,7 +31,7 @@ export default function Index() {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
-      const [tradingVolume, activeBots, brokerConnections, performance, contracts] = await Promise.all([
+      const [tradingVolume, activeBots, brokerConnections, performance, contracts, accounts] = await Promise.all([
         supabase
           .from("bot_trades")
           .select("entry_price, quantity")
@@ -57,9 +57,13 @@ export default function Index() {
           .select("capital, profit")
           .eq("user_id", user.user.id)
           .eq("status", "active"),
+        supabase
+          .from("trading_accounts")
+          .select("balance")
+          .eq("user_id", user.user.id)
       ]);
 
-      console.log("Contracts data:", contracts);
+      console.log("Accounts data:", accounts);
 
       const volume = tradingVolume.data?.reduce((acc, trade) => 
         acc + (Number(trade.entry_price) * Number(trade.quantity)), 0) || 0;
@@ -73,8 +77,10 @@ export default function Index() {
       const totalProfit = contracts.data?.reduce((acc, contract) => 
         acc + Number(contract.profit), 0) || 0;
 
-      console.log("Total Capital:", totalCapital);
-      console.log("Total Profit:", totalProfit);
+      const totalBalance = accounts.data?.reduce((acc, account) => 
+        acc + Number(account.balance), 0) || 0;
+
+      console.log("Total Balance:", totalBalance);
 
       return {
         volume,
@@ -83,11 +89,20 @@ export default function Index() {
         monthlyReturn: monthlyPnl,
         totalCapital,
         totalProfit,
+        totalBalance
       };
     },
   });
 
   const stats = [
+    {
+      title: "System Balance",
+      value: tradingStats ? `$${tradingStats.totalBalance.toLocaleString()}` : "$0",
+      description: "Total balance across all accounts",
+      icon: Wallet,
+      className: "col-span-2 bg-green-50 dark:bg-green-950",
+      valueClassName: "text-3xl text-green-600 dark:text-green-400"
+    },
     {
       title: "Total Trading Volume",
       value: tradingStats ? `$${tradingStats.volume.toLocaleString()}` : "$0",
@@ -138,7 +153,7 @@ export default function Index() {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
+            <Card key={stat.title} className={stat.className}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   {stat.title}
@@ -146,7 +161,9 @@ export default function Index() {
                 <Icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className={`text-2xl font-bold ${stat.valueClassName || ''}`}>
+                  {stat.value}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {stat.description}
                 </p>
