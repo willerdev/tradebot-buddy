@@ -11,26 +11,48 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Withdraw() {
   const [walletAddress, setWalletAddress] = useState("");
   const [amount, setAmount] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleWithdraw = async () => {
     try {
+      setIsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+
+      // First check if the user has sufficient balance
+      const { data: accounts } = await supabase
+        .from('trading_accounts')
+        .select('balance')
+        .eq('user_id', user.id)
+        .eq('account_type', 'live')
+        .single();
+
+      if (!accounts || accounts.balance < Number(amount)) {
+        toast({
+          title: "Insufficient Balance",
+          description: "You don't have enough balance for this withdrawal.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       const { error } = await supabase.from("withdrawals").insert({
         user_id: user.id,
         amount: Number(amount),
         currency: "USDT",
         wallet_address: walletAddress,
-        status: "completed"
+        status: "pending" // Changed from 'completed' to 'pending' as a safer default
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Withdrawal error:", error);
+        throw error;
+      }
 
       toast({
         title: "Withdrawal Requested",
-        description: "Your withdrawal request has been submitted successfully.",
+        description: "Your withdrawal request has been submitted and is being processed.",
       });
 
       setWalletAddress("");
@@ -42,6 +64,8 @@ export default function Withdraw() {
         description: "Failed to process withdrawal. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -85,9 +109,9 @@ export default function Withdraw() {
             <Button 
               className="w-full" 
               onClick={handleWithdraw}
-              disabled={!walletAddress || !amount}
+              disabled={!walletAddress || !amount || isLoading}
             >
-              Withdraw
+              {isLoading ? "Processing..." : "Withdraw"}
             </Button>
           </div>
 
