@@ -1,11 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, DollarSign, TrendingUp, Users, Wallet } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
+import { SystemInfoDisplay } from "@/components/dashboard/SystemInfoDisplay";
+import { StatsDisplay } from "@/components/dashboard/StatsDisplay";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -63,8 +63,6 @@ export default function Index() {
           .eq("user_id", user.user.id)
       ]);
 
-      console.log("Accounts data:", accounts);
-
       const volume = tradingVolume.data?.reduce((acc, trade) => 
         acc + (Number(trade.entry_price) * Number(trade.quantity)), 0) || 0;
 
@@ -80,8 +78,6 @@ export default function Index() {
       const totalBalance = accounts.data?.reduce((acc, account) => 
         acc + Number(account.balance), 0) || 0;
 
-      console.log("Total Balance:", totalBalance);
-
       return {
         volume,
         activeBots: activeBots.data?.length || 0,
@@ -94,49 +90,8 @@ export default function Index() {
     },
   });
 
-  const stats = [
-    {
-      title: "System Balance",
-      value: tradingStats ? `$${tradingStats.totalBalance.toLocaleString()}` : "$0",
-      description: "Total balance across all accounts",
-      icon: Wallet,
-      className: "col-span-2 bg-green-50 dark:bg-green-950",
-      valueClassName: "text-3xl text-green-600 dark:text-green-400"
-    },
-    {
-      title: "Total Trading Volume",
-      value: tradingStats ? `$${tradingStats.volume.toLocaleString()}` : "$0",
-      description: "Last 30 days",
-      icon: DollarSign,
-    },
-    {
-      title: "Contract Capital",
-      value: tradingStats ? `$${tradingStats.totalCapital.toLocaleString()}` : "$0",
-      description: "Active contracts",
-      icon: Wallet,
-    },
-    {
-      title: "Contract Profit",
-      value: tradingStats ? `$${tradingStats.totalProfit.toLocaleString()}` : "$0",
-      description: "Total profit",
-      icon: TrendingUp,
-    },
-    {
-      title: "Active Bots",
-      value: tradingStats?.activeBots.toString() || "0",
-      description: "Currently running",
-      icon: Activity,
-    },
-    {
-      title: "Connected Brokers",
-      value: tradingStats?.brokerConnections.toString() || "0",
-      description: "API integrations",
-      icon: Users,
-    },
-  ];
-
   return (
-    <div className="container mx-auto py-6 space-y-8 animate-fade-up">
+    <div className="container mx-auto py-6 space-y-8 animate-fade-up px-4 md:px-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -149,53 +104,12 @@ export default function Index() {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.title} className={stat.className}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.title}
-                </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className={`text-2xl font-bold ${stat.valueClassName || ''}`}>
-                  {stat.value}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <StatsDisplay tradingStats={tradingStats} />
+      
+      <SystemInfoDisplay />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <TransactionHistory />
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Active Strategies</CardTitle>
-            <CardDescription>Currently running trading strategies</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">No active strategies</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Balance</CardTitle>
-            <CardDescription>Your current trading balance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$10,000.00</div>
-            <p className="text-xs text-muted-foreground mt-1">Demo Account</p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
