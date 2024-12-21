@@ -30,11 +30,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
+const NotificationMethod = z.enum(["email", "sms", "whatsapp"]);
+type NotificationMethod = z.infer<typeof NotificationMethod>;
+
 const settingsSchema = z.object({
   profit_percentage: z.coerce.number(),
   trading_budget: z.coerce.number(),
   withdraw_wallet: z.string().min(1, "Withdraw wallet is required"),
-  notification_method: z.enum(["email", "sms", "whatsapp"]),
+  notification_method: NotificationMethod,
   subscription_end_date: z.string(),
 });
 
@@ -83,10 +86,10 @@ export function CopytraderSettings({
   useEffect(() => {
     if (settings) {
       form.reset({
-        profit_percentage: settings.profit_percentage,
-        trading_budget: settings.trading_budget,
+        profit_percentage: Number(settings.profit_percentage),
+        trading_budget: Number(settings.trading_budget),
         withdraw_wallet: settings.withdraw_wallet || "",
-        notification_method: settings.notification_method || "email",
+        notification_method: (settings.notification_method as NotificationMethod) || "email",
         subscription_end_date: new Date(settings.subscription_end_date || new Date())
           .toISOString()
           .split("T")[0],
