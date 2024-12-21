@@ -31,8 +31,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
 const settingsSchema = z.object({
-  profit_percentage: z.string().transform((val) => Number(val)),
-  trading_budget: z.string().transform((val) => Number(val)),
+  profit_percentage: z.coerce.number(),
+  trading_budget: z.coerce.number(),
   withdraw_wallet: z.string().min(1, "Withdraw wallet is required"),
   notification_method: z.enum(["email", "sms", "whatsapp"]),
   subscription_end_date: z.string(),
@@ -57,8 +57,8 @@ export function CopytraderSettings({
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      profit_percentage: "0",
-      trading_budget: "0",
+      profit_percentage: 0,
+      trading_budget: 0,
       withdraw_wallet: "",
       notification_method: "email",
       subscription_end_date: new Date().toISOString().split("T")[0],
@@ -72,7 +72,7 @@ export function CopytraderSettings({
         .from("copytrader_settings")
         .select("*")
         .eq("copytrader_id", traderId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -83,8 +83,8 @@ export function CopytraderSettings({
   useEffect(() => {
     if (settings) {
       form.reset({
-        profit_percentage: settings.profit_percentage.toString(),
-        trading_budget: settings.trading_budget.toString(),
+        profit_percentage: settings.profit_percentage,
+        trading_budget: settings.trading_budget,
         withdraw_wallet: settings.withdraw_wallet || "",
         notification_method: settings.notification_method || "email",
         subscription_end_date: new Date(settings.subscription_end_date || new Date())
@@ -118,6 +118,7 @@ export function CopytraderSettings({
       onOpenChange(false);
       onSettingsUpdated();
     } catch (error) {
+      console.error("Error updating settings:", error);
       toast({
         title: "Error",
         description: "Failed to update copytrader settings",
