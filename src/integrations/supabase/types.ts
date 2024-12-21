@@ -750,6 +750,50 @@ export type Database = {
         }
         Relationships: []
       }
+      copytrader_settings: {
+        Row: {
+          copytrader_id: string | null
+          created_at: string
+          id: string
+          notification_method: string | null
+          profit_percentage: number
+          subscription_end_date: string | null
+          trading_budget: number
+          updated_at: string
+          withdraw_wallet: string | null
+        }
+        Insert: {
+          copytrader_id?: string | null
+          created_at?: string
+          id?: string
+          notification_method?: string | null
+          profit_percentage?: number
+          subscription_end_date?: string | null
+          trading_budget?: number
+          updated_at?: string
+          withdraw_wallet?: string | null
+        }
+        Update: {
+          copytrader_id?: string | null
+          created_at?: string
+          id?: string
+          notification_method?: string | null
+          profit_percentage?: number
+          subscription_end_date?: string | null
+          trading_budget?: number
+          updated_at?: string
+          withdraw_wallet?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copytrader_settings_copytrader_id_fkey"
+            columns: ["copytrader_id"]
+            isOneToOne: false
+            referencedRelation: "copytraders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copytraders: {
         Row: {
           country: string
