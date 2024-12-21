@@ -4,8 +4,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { SystemEvent, SystemMonitoring } from "@/types/database";
 import { format } from "date-fns";
+import { useEffect, useState } from "react";
 
 export default function Monitoring() {
+  const [animatedMetrics, setAnimatedMetrics] = useState<Record<string, Record<string, number>>>({});
+
   const { data: monitoring } = useQuery<SystemMonitoring[]>({
     queryKey: ["system-monitoring"],
     queryFn: async () => {
@@ -40,6 +43,47 @@ export default function Monitoring() {
     },
   });
 
+  // Function to generate random percentage change
+  const generateRandomChange = (currentValue: number) => {
+    const changePercentage = (Math.random() * 10) - 5; // Random change between -5% and +5%
+    const change = currentValue * (changePercentage / 100);
+    return Math.max(0, currentValue + change); // Ensure value doesn't go below 0
+  };
+
+  // Initialize and update animated metrics
+  useEffect(() => {
+    if (!monitoring) return;
+
+    // Initialize animated metrics if not already set
+    const initialMetrics: Record<string, Record<string, number>> = {};
+    monitoring.forEach(item => {
+      if (item.metrics && typeof item.metrics === 'object') {
+        initialMetrics[item.id] = Object.entries(item.metrics).reduce((acc, [key, value]) => ({
+          ...acc,
+          [key]: typeof value === 'number' ? value : 0
+        }), {});
+      }
+    });
+    if (Object.keys(animatedMetrics).length === 0) {
+      setAnimatedMetrics(initialMetrics);
+    }
+
+    // Set up interval for random changes
+    const interval = setInterval(() => {
+      setAnimatedMetrics(prev => {
+        const newMetrics = { ...prev };
+        Object.keys(newMetrics).forEach(itemId => {
+          Object.keys(newMetrics[itemId]).forEach(metricKey => {
+            newMetrics[itemId][metricKey] = generateRandomChange(newMetrics[itemId][metricKey]);
+          });
+        });
+        return newMetrics;
+      });
+    }, 10000); // Update every 10 seconds
+
+    return () => clearInterval(interval);
+  }, [monitoring]);
+
   return (
     <div className="container mx-auto py-6 space-y-8 animate-fade-up">
       <div>
@@ -70,7 +114,9 @@ export default function Monitoring() {
                   ([key, value]) => (
                     <div key={key} className="flex justify-between mt-1">
                       <span>{key}:</span>
-                      <span>{value}</span>
+                      <span className="transition-all duration-1000 ease-in-out">
+                        {animatedMetrics[item.id]?.[key]?.toFixed(2) || value}
+                      </span>
                     </div>
                   )
                 )}
