@@ -1,13 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, User, Palette, Shield, TrendingUp, Wallet, Info } from "lucide-react";
 import { AccountSettings } from "@/components/settings/AccountSettings";
 import { StrategySettings } from "@/components/settings/StrategySettings";
 import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { TransactionSettings } from "@/components/settings/TransactionSettings";
+import { SystemInfoSettings } from "@/components/settings/SystemInfoSettings";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { User, Palette, Shield, TrendingUp, Wallet } from "lucide-react";
 
 export default function Settings() {
   const isMobile = useIsMobile();
@@ -49,6 +49,10 @@ export default function Settings() {
             <Shield className="h-4 w-4" />
             {!isMobile && "Security"}
           </TabsTrigger>
+          <TabsTrigger value="system" className="flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            {!isMobile && "System Info"}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="account">
           <AccountSettings />
@@ -64,6 +68,9 @@ export default function Settings() {
         </TabsContent>
         <TabsContent value="security">
           <SecuritySettings />
+        </TabsContent>
+        <TabsContent value="system">
+          <SystemInfoSettings />
         </TabsContent>
       </Tabs>
     </div>

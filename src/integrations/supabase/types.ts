@@ -1310,6 +1310,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_info: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          status: string | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       system_monitoring: {
         Row: {
           component_name: string
