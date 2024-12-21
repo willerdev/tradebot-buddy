@@ -11,18 +11,21 @@ export default function Index() {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
-    } else {
-      navigate("/auth");
-    }
-  };
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
+      const { data } = await supabase
+        .from("admins")
+        .select("*")
+        .eq("user_id", user.user.id)
+        .maybeSingle();
+
+      return !!data;
+    },
+  });
 
   const { data: tradingStats } = useQuery({
     queryKey: ["trading-stats"],
@@ -89,6 +92,19 @@ export default function Index() {
       };
     },
   });
+  
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      navigate("/auth");
+    }
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-8 animate-fade-up px-4 md:px-6">
@@ -96,7 +112,9 @@ export default function Index() {
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground">
-            Welcome to your trading dashboard. Monitor your performance and manage your trading bots.
+            {isAdmin 
+              ? "Admin dashboard - Monitor system performance and manage users"
+              : "Welcome to your trading dashboard. Monitor your performance and manage your trading bots."}
           </p>
         </div>
         <Button variant="outline" onClick={handleLogout}>
@@ -106,7 +124,7 @@ export default function Index() {
 
       <StatsDisplay tradingStats={tradingStats} />
       
-      <SystemInfoDisplay />
+      {!isAdmin && <SystemInfoDisplay />}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <TransactionHistory />
