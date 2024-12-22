@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { SystemEvent, SystemMonitoring } from "@/types/database";
 import { format } from "date-fns";
@@ -79,7 +78,7 @@ export default function Monitoring() {
         });
         return newMetrics;
       });
-    }, 10000); // Update every 10 seconds
+    }, 2000); // Update every 2 seconds
 
     return () => clearInterval(interval);
   }, [monitoring]);
@@ -129,14 +128,12 @@ export default function Monitoring() {
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">Recent Events</h2>
         {events?.map((event) => (
-          <Alert key={event.id}>
-            <AlertDescription>
-              {event.event_description}
-              <div className="text-xs text-muted-foreground mt-1">
-                {format(new Date(event.created_at), "PPpp")}
-              </div>
-            </AlertDescription>
-          </Alert>
+          <div key={event.id} className="bg-gray-100 p-4 rounded-lg">
+            <p>{event.event_description}</p>
+            <div className="text-xs text-muted-foreground mt-1">
+              {format(new Date(event.created_at), "PPpp")}
+            </div>
+          </div>
         ))}
       </div>
     </div>
