@@ -37,9 +37,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event);
       
-      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
-        navigate("/auth");
-      } else if (!session && location.pathname !== "/auth") {
+      if (event === 'SIGNED_OUT' || !session) {
         navigate("/auth");
       }
     });
