@@ -4,6 +4,7 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -56,6 +57,12 @@ export default function AuthPage() {
       <div className="text-2xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
         MuraFx
       </div>
+
+      <Alert className="mb-6 max-w-md">
+        <AlertDescription>
+          System under upgrade. Please come back later.
+        </AlertDescription>
+      </Alert>
       
       <Card className="w-full max-w-md">
         <CardContent className="pt-6">

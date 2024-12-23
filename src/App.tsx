@@ -6,17 +6,12 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import Index from "./pages/Index";
 import Settings from "./pages/Settings";
-import Monitoring from "./pages/Monitoring";
 import Bots from "./pages/Bots";
-import Brokers from "./pages/Brokers";
-import Copytraders from "./pages/Copytraders";
 import Contract from "./pages/Contract";
-import Terminal from "./pages/Terminal";
+import Copytraders from "./pages/Copytraders";
+import Reports from "./pages/Reports";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
-import BotTraining from "./pages/BotTraining";
-import Deposit from "./pages/Deposit";
-import Withdraw from "./pages/Withdraw";
 
 const queryClient = new QueryClient();
 
@@ -32,15 +27,10 @@ const App = () => (
           <Route element={<AppLayout><Outlet /></AppLayout>}>
             <Route path="/dashboard" element={<Index />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/monitoring" element={<Monitoring />} />
             <Route path="/bots" element={<Bots />} />
-            <Route path="/brokers" element={<Brokers />} />
-            <Route path="/copytraders" element={<Copytraders />} />
             <Route path="/contract" element={<Contract />} />
-            <Route path="/terminal/:botId" element={<Terminal />} />
-            <Route path="/bot-training" element={<BotTraining />} />
-            <Route path="/deposit" element={<Deposit />} />
-            <Route path="/withdraw" element={<Withdraw />} />
+            <Route path="/copytraders" element={<Copytraders />} />
+            <Route path="/reports" element={<Reports />} />
           </Route>
         </Routes>
       </BrowserRouter>

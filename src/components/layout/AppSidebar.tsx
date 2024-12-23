@@ -1,4 +1,4 @@
-import { Activity, Bot, LineChart, Settings, Users, Wallet, GitCompare, Terminal, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { LineChart, Bot, GitCompare, Users, FileText, Settings } from "lucide-react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
@@ -13,14 +13,10 @@ import {
 
 const menuItems = [
   { title: "Dashboard", icon: LineChart, path: "/dashboard" },
-  { title: "Active Bots", icon: Bot, path: "/bots" },
+  { title: "Trading Bots", icon: Bot, path: "/bots" },
   { title: "Contract Bots", icon: GitCompare, path: "/contract" },
-  { title: "Bot Training", icon: Terminal, path: "/bot-training" },
-  { title: "Monitoring", icon: Activity, path: "/monitoring" },
-  { title: "Copytraders", icon: Users, path: "/copytraders" },
-  { title: "Brokers", icon: Wallet, path: "/brokers" },
-  { title: "Deposit", icon: ArrowDownCircle, path: "/deposit" },
-  { title: "Withdraw", icon: ArrowUpCircle, path: "/withdraw" },
+  { title: "Copy Traders", icon: Users, path: "/copytraders" },
+  { title: "Reports", icon: FileText, path: "/reports" },
   { title: "Settings", icon: Settings, path: "/settings" },
 ];
 

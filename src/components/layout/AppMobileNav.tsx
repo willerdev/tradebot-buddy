@@ -1,13 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { Activity, Bot, LineChart, Settings, Users, LogOut } from "lucide-react";
+import { Home, Bot, GitCompare, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
 const menuItems = [
-  { title: "Dashboard", icon: LineChart, path: "/dashboard" },
+  { title: "Home", icon: Home, path: "/dashboard" },
   { title: "Bots", icon: Bot, path: "/bots" },
-  { title: "Traders", icon: Users, path: "/copytraders" },
+  { title: "Contract", icon: GitCompare, path: "/contract" },
   { title: "Settings", icon: Settings, path: "/settings" },
 ];
 
@@ -44,13 +44,6 @@ export function AppMobileNav() {
             <span className="mt-1">{item.title}</span>
           </Link>
         ))}
-        <button
-          onClick={handleLogout}
-          className="flex flex-col items-center p-2 text-xs text-muted-foreground hover:text-primary"
-        >
-          <LogOut className="h-5 w-5" />
-          <span className="mt-1">Logout</span>
-        </button>
       </div>
     </nav>
   );
