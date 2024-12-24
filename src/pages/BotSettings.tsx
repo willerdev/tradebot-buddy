@@ -22,15 +22,17 @@ const PROFIT_TARGETS = [
   { value: 10, days: 30 }
 ];
 
+const DEFAULT_SETTINGS = {
+  min_operating_fund: 5500,
+  lot_sizes: [0.01, 0.05, 0.1, 0.5, 1.0],
+  selected_pairs: [] as string[],
+  profit_target: 0.5,
+  fund_split_percentage: 50
+};
+
 export default function BotSettings() {
   const { toast } = useToast();
-  const [settings, setSettings] = useState({
-    min_operating_fund: 5500,
-    lot_sizes: [0.01, 0.05, 0.1, 0.5, 1.0],
-    selected_pairs: [] as string[],
-    profit_target: 0.5,
-    fund_split_percentage: 50
-  });
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -39,24 +41,49 @@ export default function BotSettings() {
 
   const loadSettings = async () => {
     try {
+      console.log("Loading settings...");
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      if (!session) {
+        console.log("No session found");
+        return;
+      }
 
       const { data, error } = await supabase
         .from('bot_settings')
         .select('*')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading settings:', error);
+        throw error;
+      }
+
       if (data) {
+        console.log("Settings loaded:", data);
         setSettings(data);
+      } else {
+        console.log("No settings found, creating default settings");
+        // Create default settings for new users
+        const { error: insertError } = await supabase
+          .from('bot_settings')
+          .insert({
+            user_id: session.user.id,
+            ...DEFAULT_SETTINGS
+          });
+
+        if (insertError) {
+          console.error('Error creating default settings:', insertError);
+          throw insertError;
+        }
+
+        setSettings(DEFAULT_SETTINGS);
       }
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error('Error in loadSettings:', error);
       toast({
         title: "Error",
-        description: "Failed to load settings",
+        description: "Failed to load settings. Please try again.",
         variant: "destructive",
       });
     }
@@ -65,8 +92,11 @@ export default function BotSettings() {
   const saveSettings = async () => {
     try {
       setLoading(true);
+      console.log("Saving settings...");
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No session');
+      if (!session) {
+        throw new Error('No session');
+      }
 
       const { error } = await supabase
         .from('bot_settings')
@@ -77,6 +107,7 @@ export default function BotSettings() {
 
       if (error) throw error;
 
+      console.log("Settings saved successfully");
       toast({
         title: "Success",
         description: "Settings saved successfully",
@@ -85,7 +116,7 @@ export default function BotSettings() {
       console.error('Error saving settings:', error);
       toast({
         title: "Error",
-        description: "Failed to save settings",
+        description: "Failed to save settings. Please try again.",
         variant: "destructive",
       });
     } finally {
