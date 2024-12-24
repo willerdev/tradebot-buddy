@@ -2,32 +2,27 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
-
-const TRADING_PAIRS = [
-  "BTC/USDT", "ETH/USDT", "BNB/USDT", "XRP/USDT", "ADA/USDT",
-  "DOGE/USDT", "SOL/USDT", "DOT/USDT", "MATIC/USDT", "LINK/USDT",
-  "UNI/USDT", "ATOM/USDT", "LTC/USDT", "AVAX/USDT", "FTM/USDT",
-  "NEAR/USDT", "ALGO/USDT", "FIL/USDT", "VET/USDT", "SAND/USDT"
-];
-
-const PROFIT_TARGETS = [
-  { value: 0.5, days: 3 },
-  { value: 1, days: 5 },
-  { value: 5, days: 14 },
-  { value: 10, days: 30 }
-];
+import { NotificationSettings } from "@/components/bot-settings/NotificationSettings";
+import { ServerSettings } from "@/components/bot-settings/ServerSettings";
+import { TradingSessionSettings } from "@/components/bot-settings/TradingSessionSettings";
+import { LotSizeSettings } from "@/components/bot-settings/LotSizeSettings";
 
 const DEFAULT_SETTINGS = {
   min_operating_fund: 5500,
   lot_sizes: [0.01, 0.05, 0.1, 0.5, 1.0],
   selected_pairs: [] as string[],
   profit_target: 0.5,
-  fund_split_percentage: 50
+  fund_split_percentage: 50,
+  notification_email: "",
+  notification_phone: "",
+  whatsapp_number: "",
+  server_type: "online",
+  server_url: "",
+  trading_sessions: [] as string[],
+  lot_size_type: "default",
+  custom_lot_size: 0.01,
+  risk_percentage: 1,
 };
 
 export default function BotSettings() {
@@ -64,7 +59,6 @@ export default function BotSettings() {
         setSettings(data);
       } else {
         console.log("No settings found, creating default settings");
-        // Create default settings for new users
         const { error: insertError } = await supabase
           .from('bot_settings')
           .insert({
@@ -137,85 +131,44 @@ export default function BotSettings() {
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold mb-6">Bot Settings</h1>
 
-      <Card className="p-6 space-y-6">
-        <div className="space-y-4">
-          <Label>Minimum Bot Operating Fund (USDT)</Label>
-          <Slider
-            value={[settings.min_operating_fund]}
-            onValueChange={([value]) => setSettings(prev => ({ ...prev, min_operating_fund: value }))}
-            min={5500}
-            max={100000}
-            step={100}
-            className="w-full"
+      <div className="grid gap-6">
+        <Card className="p-6">
+          <NotificationSettings
+            email={settings.notification_email}
+            phone={settings.notification_phone}
+            whatsapp={settings.whatsapp_number}
+            onEmailChange={(value) => setSettings(prev => ({ ...prev, notification_email: value }))}
+            onPhoneChange={(value) => setSettings(prev => ({ ...prev, notification_phone: value }))}
+            onWhatsappChange={(value) => setSettings(prev => ({ ...prev, whatsapp_number: value }))}
           />
-          <span className="text-sm text-muted-foreground">
-            Current value: {settings.min_operating_fund} USDT
-          </span>
-        </div>
+        </Card>
 
-        <div className="space-y-4">
-          <Label>Lot Sizes</Label>
-          <div className="flex flex-wrap gap-2">
-            {settings.lot_sizes.map((size, index) => (
-              <div key={index} className="bg-secondary p-2 rounded">
-                {size}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <Label>Trading Pairs</Label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {TRADING_PAIRS.map((pair) => (
-              <div key={pair} className="flex items-center space-x-2">
-                <Checkbox
-                  id={pair}
-                  checked={settings.selected_pairs.includes(pair)}
-                  onCheckedChange={() => handlePairToggle(pair)}
-                />
-                <label htmlFor={pair} className="text-sm cursor-pointer">
-                  {pair}
-                </label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <Label>Profit Target</Label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {PROFIT_TARGETS.map((target) => (
-              <div
-                key={target.value}
-                className={`p-4 rounded-lg cursor-pointer border ${
-                  settings.profit_target === target.value
-                    ? 'border-primary bg-primary/10'
-                    : 'border-border'
-                }`}
-                onClick={() => setSettings(prev => ({ ...prev, profit_target: target.value }))}
-              >
-                <div className="font-medium">{target.value}%</div>
-                <div className="text-sm text-muted-foreground">~{target.days} days</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <Label>Fund Split Percentage (Bot vs Contract)</Label>
-          <Slider
-            value={[settings.fund_split_percentage]}
-            onValueChange={([value]) => setSettings(prev => ({ ...prev, fund_split_percentage: value }))}
-            min={0}
-            max={100}
-            step={5}
-            className="w-full"
+        <Card className="p-6">
+          <ServerSettings
+            serverType={settings.server_type}
+            serverUrl={settings.server_url}
+            onServerTypeChange={(value) => setSettings(prev => ({ ...prev, server_type: value }))}
+            onServerUrlChange={(value) => setSettings(prev => ({ ...prev, server_url: value }))}
           />
-          <div className="text-sm text-muted-foreground">
-            Bot: {settings.fund_split_percentage}% | Contract: {100 - settings.fund_split_percentage}%
-          </div>
-        </div>
+        </Card>
+
+        <Card className="p-6">
+          <TradingSessionSettings
+            selectedSessions={settings.trading_sessions}
+            onSessionChange={(sessions) => setSettings(prev => ({ ...prev, trading_sessions: sessions }))}
+          />
+        </Card>
+
+        <Card className="p-6">
+          <LotSizeSettings
+            lotSizeType={settings.lot_size_type}
+            customLotSize={settings.custom_lot_size}
+            riskPercentage={settings.risk_percentage}
+            onLotSizeTypeChange={(value) => setSettings(prev => ({ ...prev, lot_size_type: value }))}
+            onCustomLotSizeChange={(value) => setSettings(prev => ({ ...prev, custom_lot_size: value }))}
+            onRiskPercentageChange={(value) => setSettings(prev => ({ ...prev, risk_percentage: value }))}
+          />
+        </Card>
 
         <Button
           onClick={saveSettings}
@@ -224,7 +177,7 @@ export default function BotSettings() {
         >
           {loading ? "Saving..." : "Save Settings"}
         </Button>
-      </Card>
+      </div>
     </div>
   );
 }

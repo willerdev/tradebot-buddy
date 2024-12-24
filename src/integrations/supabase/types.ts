@@ -502,36 +502,63 @@ export type Database = {
       bot_settings: {
         Row: {
           created_at: string
+          custom_lot_size: number | null
           fund_split_percentage: number
           id: string
+          lot_size_type: string | null
           lot_sizes: number[]
           min_operating_fund: number
+          notification_email: string | null
+          notification_phone: string | null
           profit_target: number
+          risk_percentage: number | null
           selected_pairs: string[]
+          server_type: string | null
+          server_url: string | null
+          trading_sessions: string[] | null
           updated_at: string
           user_id: string
+          whatsapp_number: string | null
         }
         Insert: {
           created_at?: string
+          custom_lot_size?: number | null
           fund_split_percentage?: number
           id?: string
+          lot_size_type?: string | null
           lot_sizes?: number[]
           min_operating_fund?: number
+          notification_email?: string | null
+          notification_phone?: string | null
           profit_target?: number
+          risk_percentage?: number | null
           selected_pairs?: string[]
+          server_type?: string | null
+          server_url?: string | null
+          trading_sessions?: string[] | null
           updated_at?: string
           user_id: string
+          whatsapp_number?: string | null
         }
         Update: {
           created_at?: string
+          custom_lot_size?: number | null
           fund_split_percentage?: number
           id?: string
+          lot_size_type?: string | null
           lot_sizes?: number[]
           min_operating_fund?: number
+          notification_email?: string | null
+          notification_phone?: string | null
           profit_target?: number
+          risk_percentage?: number | null
           selected_pairs?: string[]
+          server_type?: string | null
+          server_url?: string | null
+          trading_sessions?: string[] | null
           updated_at?: string
           user_id?: string
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
