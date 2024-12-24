@@ -60,7 +60,15 @@ export default function BotSettings() {
 
       if (data) {
         console.log("Settings loaded:", data);
-        setSettings(data);
+        // Transform the data to match our state interface
+        const transformedData = {
+          ...DEFAULT_SETTINGS,
+          ...data,
+          operating_fund: data.operating_fund || DEFAULT_SETTINGS.operating_fund,
+          withdraw_wallet: data.withdraw_wallet || DEFAULT_SETTINGS.withdraw_wallet,
+          network: data.network || DEFAULT_SETTINGS.network,
+        };
+        setSettings(transformedData);
       } else {
         console.log("No settings found, creating default settings");
         const { error: insertError } = await supabase

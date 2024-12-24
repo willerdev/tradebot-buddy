@@ -508,8 +508,10 @@ export type Database = {
           lot_size_type: string | null
           lot_sizes: number[]
           min_operating_fund: number
+          network: string | null
           notification_email: string | null
           notification_phone: string | null
+          operating_fund: number | null
           profit_target: number
           risk_percentage: number | null
           selected_pairs: string[]
@@ -519,6 +521,7 @@ export type Database = {
           updated_at: string
           user_id: string
           whatsapp_number: string | null
+          withdraw_wallet: string | null
         }
         Insert: {
           created_at?: string
@@ -528,8 +531,10 @@ export type Database = {
           lot_size_type?: string | null
           lot_sizes?: number[]
           min_operating_fund?: number
+          network?: string | null
           notification_email?: string | null
           notification_phone?: string | null
+          operating_fund?: number | null
           profit_target?: number
           risk_percentage?: number | null
           selected_pairs?: string[]
@@ -539,6 +544,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           whatsapp_number?: string | null
+          withdraw_wallet?: string | null
         }
         Update: {
           created_at?: string
@@ -548,8 +554,10 @@ export type Database = {
           lot_size_type?: string | null
           lot_sizes?: number[]
           min_operating_fund?: number
+          network?: string | null
           notification_email?: string | null
           notification_phone?: string | null
+          operating_fund?: number | null
           profit_target?: number
           risk_percentage?: number | null
           selected_pairs?: string[]
@@ -559,6 +567,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           whatsapp_number?: string | null
+          withdraw_wallet?: string | null
         }
         Relationships: []
       }
