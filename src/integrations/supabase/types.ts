@@ -499,6 +499,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_settings: {
+        Row: {
+          created_at: string
+          fund_split_percentage: number
+          id: string
+          lot_sizes: number[]
+          min_operating_fund: number
+          profit_target: number
+          selected_pairs: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          fund_split_percentage?: number
+          id?: string
+          lot_sizes?: number[]
+          min_operating_fund?: number
+          profit_target?: number
+          selected_pairs?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          fund_split_percentage?: number
+          id?: string
+          lot_sizes?: number[]
+          min_operating_fund?: number
+          profit_target?: number
+          selected_pairs?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bot_trades: {
         Row: {
           bot_id: string

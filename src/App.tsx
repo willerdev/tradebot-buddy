@@ -10,6 +10,7 @@ import Bots from "./pages/Bots";
 import Contract from "./pages/Contract";
 import Copytraders from "./pages/Copytraders";
 import Reports from "./pages/Reports";
+import BotSettings from "./pages/BotSettings";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/dashboard" element={<Index />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/bots" element={<Bots />} />
+            <Route path="/bot-settings" element={<BotSettings />} />
             <Route path="/contract" element={<Contract />} />
             <Route path="/copytraders" element={<Copytraders />} />
             <Route path="/reports" element={<Reports />} />
