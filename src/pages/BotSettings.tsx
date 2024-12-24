@@ -7,6 +7,7 @@ import { NotificationSettings } from "@/components/bot-settings/NotificationSett
 import { ServerSettings } from "@/components/bot-settings/ServerSettings";
 import { TradingSessionSettings } from "@/components/bot-settings/TradingSessionSettings";
 import { LotSizeSettings } from "@/components/bot-settings/LotSizeSettings";
+import { TradingParameters } from "@/components/bot-settings/TradingParameters";
 
 const DEFAULT_SETTINGS = {
   min_operating_fund: 5500,
@@ -23,6 +24,9 @@ const DEFAULT_SETTINGS = {
   lot_size_type: "default",
   custom_lot_size: 0.01,
   risk_percentage: 1,
+  operating_fund: 5500,
+  withdraw_wallet: "",
+  network: "TRC20",
 };
 
 export default function BotSettings() {
@@ -118,15 +122,6 @@ export default function BotSettings() {
     }
   };
 
-  const handlePairToggle = (pair: string) => {
-    setSettings(prev => ({
-      ...prev,
-      selected_pairs: prev.selected_pairs.includes(pair)
-        ? prev.selected_pairs.filter(p => p !== pair)
-        : [...prev.selected_pairs, pair]
-    }));
-  };
-
   return (
     <div className="container mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold mb-6">Bot Settings</h1>
@@ -167,6 +162,30 @@ export default function BotSettings() {
             onLotSizeTypeChange={(value) => setSettings(prev => ({ ...prev, lot_size_type: value }))}
             onCustomLotSizeChange={(value) => setSettings(prev => ({ ...prev, custom_lot_size: value }))}
             onRiskPercentageChange={(value) => setSettings(prev => ({ ...prev, risk_percentage: value }))}
+          />
+        </Card>
+
+        <Card className="p-6">
+          <TradingParameters
+            operatingFund={settings.operating_fund}
+            withdrawWallet={settings.withdraw_wallet}
+            network={settings.network}
+            selectedPairs={settings.selected_pairs}
+            profitTarget={settings.profit_target}
+            fundSplitPercentage={settings.fund_split_percentage}
+            onOperatingFundChange={(value) => setSettings(prev => ({ ...prev, operating_fund: value }))}
+            onWithdrawWalletChange={(value) => setSettings(prev => ({ ...prev, withdraw_wallet: value }))}
+            onNetworkChange={(value) => setSettings(prev => ({ ...prev, network: value }))}
+            onPairToggle={(pair) => {
+              setSettings(prev => ({
+                ...prev,
+                selected_pairs: prev.selected_pairs.includes(pair)
+                  ? prev.selected_pairs.filter(p => p !== pair)
+                  : [...prev.selected_pairs, pair]
+              }));
+            }}
+            onProfitTargetChange={(value) => setSettings(prev => ({ ...prev, profit_target: value }))}
+            onFundSplitChange={(value) => setSettings(prev => ({ ...prev, fund_split_percentage: value }))}
           />
         </Card>
 
