@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import bcrypt from "bcryptjs";
 
 export default function CopytraderAuth() {
   const navigate = useNavigate();
@@ -36,9 +37,9 @@ export default function CopytraderAuth() {
         throw new Error("Invalid email or password");
       }
 
-      // Here you would normally verify the password hash
-      // For now, we're doing a simple comparison (NOT SECURE - DEMO ONLY)
-      if (password !== account.password_hash) {
+      // Verify the password using bcrypt
+      const isPasswordValid = await bcrypt.compare(password, account.password_hash);
+      if (!isPasswordValid) {
         throw new Error("Invalid email or password");
       }
 
