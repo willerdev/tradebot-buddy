@@ -25,48 +25,63 @@ export default function CopytraderAuth() {
         .from("copytrader_accounts")
         .select("*")
         .eq("email", email)
-        .single();
+        .maybeSingle();
 
-      if (accountError || !account) {
-        throw new Error("Invalid credentials");
+      if (accountError) {
+        console.error("Account lookup error:", accountError);
+        throw new Error("Error looking up account");
+      }
+
+      if (!account) {
+        throw new Error("Invalid email or password");
       }
 
       // Here you would normally verify the password hash
       // For now, we're doing a simple comparison (NOT SECURE - DEMO ONLY)
       if (password !== account.password_hash) {
-        throw new Error("Invalid credentials");
+        throw new Error("Invalid email or password");
       }
 
       // Get copytrader details
-      const { data: copytrader } = await supabase
+      const { data: copytrader, error: copytraderError } = await supabase
         .from("copytraders")
         .select("*")
         .eq("id", account.copytrader_id)
-        .single();
+        .maybeSingle();
+
+      if (copytraderError || !copytrader) {
+        console.error("Copytrader lookup error:", copytraderError);
+        throw new Error("Error retrieving copytrader details");
+      }
 
       // Store copytrader info in localStorage
       localStorage.setItem("copytrader_session", JSON.stringify({
         id: account.copytrader_id,
         email: account.email,
-        trader_name: copytrader?.trader_name
+        trader_name: copytrader.trader_name
       }));
+
+      // Update last login timestamp
+      const { error: updateError } = await supabase
+        .from("copytrader_accounts")
+        .update({ last_login: new Date().toISOString() })
+        .eq("id", account.id);
+
+      if (updateError) {
+        console.error("Failed to update last login:", updateError);
+      }
 
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in to your copytrader account.",
       });
 
-      // Update last login timestamp
-      await supabase
-        .from("copytrader_accounts")
-        .update({ last_login: new Date().toISOString() })
-        .eq("id", account.id);
-
       navigate("/copytrader/dashboard");
     } catch (error) {
+      console.error("Login error:", error);
       toast({
         title: "Error",
-        description: "Invalid email or password",
+        description: error instanceof Error ? error.message : "Invalid email or password",
         variant: "destructive",
       });
     } finally {
