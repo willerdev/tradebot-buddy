@@ -1496,6 +1496,39 @@ export type Database = {
         }
         Relationships: []
       }
+      system_funds: {
+        Row: {
+          contract_fund: number | null
+          created_at: string
+          id: string
+          profit: number | null
+          system_fund: number | null
+          updated_at: string
+          user_id: string | null
+          withdrawable_funds: number | null
+        }
+        Insert: {
+          contract_fund?: number | null
+          created_at?: string
+          id?: string
+          profit?: number | null
+          system_fund?: number | null
+          updated_at?: string
+          user_id?: string | null
+          withdrawable_funds?: number | null
+        }
+        Update: {
+          contract_fund?: number | null
+          created_at?: string
+          id?: string
+          profit?: number | null
+          system_fund?: number | null
+          updated_at?: string
+          user_id?: string | null
+          withdrawable_funds?: number | null
+        }
+        Relationships: []
+      }
       system_info: {
         Row: {
           created_at: string

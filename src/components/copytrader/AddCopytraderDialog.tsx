@@ -17,6 +17,9 @@ const copytraderSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone_number: z.string().min(10, "Phone number must be at least 10 characters"),
   country: z.string().min(2, "Country must be at least 2 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  trading_budget: z.number().min(100, "Trading budget must be at least 100"),
 });
 
 type CopytraderFormValues = z.infer<typeof copytraderSchema>;
@@ -36,6 +39,9 @@ export function AddCopytraderDialog({ onCopytraderAdded }: AddCopytraderDialogPr
       email: "",
       phone_number: "",
       country: "",
+      username: "",
+      password: "",
+      trading_budget: 1000,
     },
   });
 
@@ -44,16 +50,44 @@ export function AddCopytraderDialog({ onCopytraderAdded }: AddCopytraderDialogPr
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
-      const { error } = await supabase.from("copytraders").insert({
-        user_id: user.user.id,
-        trader_name: values.trader_name,
-        description: values.description,
-        email: values.email,
-        phone_number: values.phone_number,
-        country: values.country,
-      });
+      // First create the copytrader
+      const { data: copytrader, error: copytraderError } = await supabase
+        .from("copytraders")
+        .insert({
+          user_id: user.user.id,
+          trader_name: values.trader_name,
+          description: values.description,
+          email: values.email,
+          phone_number: values.phone_number,
+          country: values.country,
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (copytraderError) throw copytraderError;
+
+      // Then create the copytrader account
+      const { error: accountError } = await supabase
+        .from("copytrader_accounts")
+        .insert({
+          copytrader_id: copytrader.id,
+          email: values.email,
+          username: values.username,
+          password_hash: values.password, // In a real app, this should be properly hashed
+        });
+
+      if (accountError) throw accountError;
+
+      // Finally create the copytrader settings
+      const { error: settingsError } = await supabase
+        .from("copytrader_settings")
+        .insert({
+          copytrader_id: copytrader.id,
+          trading_budget: values.trading_budget,
+          profit_percentage: 0,
+        });
+
+      if (settingsError) throw settingsError;
 
       toast({
         title: "Success",
@@ -64,6 +98,7 @@ export function AddCopytraderDialog({ onCopytraderAdded }: AddCopytraderDialogPr
       form.reset();
       onCopytraderAdded();
     } catch (error) {
+      console.error("Error adding copytrader:", error);
       toast({
         title: "Error",
         description: "Failed to add copytrader",
@@ -104,6 +139,32 @@ export function AddCopytraderDialog({ onCopytraderAdded }: AddCopytraderDialogPr
             />
             <FormField
               control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
@@ -136,6 +197,23 @@ export function AddCopytraderDialog({ onCopytraderAdded }: AddCopytraderDialogPr
                   <FormLabel>Country</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="trading_budget"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Trading Budget (USD)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

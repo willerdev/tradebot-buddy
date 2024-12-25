@@ -7,56 +7,47 @@ interface StatsDisplayProps {
     activeBots: number;
     brokerConnections: number;
     monthlyReturn: number;
-    totalCapital: number;
-    totalProfit: number;
-    totalBalance: number;
+  } | undefined;
+  systemFunds: {
+    system_fund: number;
+    contract_fund: number;
+    profit: number;
+    withdrawable_funds: number;
   } | undefined;
 }
 
-export function StatsDisplay({ tradingStats }: StatsDisplayProps) {
+export function StatsDisplay({ tradingStats, systemFunds }: StatsDisplayProps) {
   const stats = [
     {
-      title: "System Balance",
-      value: tradingStats ? `$${tradingStats.totalBalance.toLocaleString()}` : "$0",
-      description: "Total balance across all accounts",
+      title: "System Fund",
+      value: systemFunds ? `$${systemFunds.system_fund.toLocaleString()}` : "$0",
+      description: "Total system balance",
       icon: Wallet,
       className: "col-span-full md:col-span-2 bg-green-50 dark:bg-green-950",
       valueClassName: "text-3xl text-green-600 dark:text-green-400"
     },
     {
-      title: "Total Trading Volume",
-      value: tradingStats ? `$${tradingStats.volume.toLocaleString()}` : "$0",
-      description: "Last 30 days",
+      title: "Contract Fund",
+      value: systemFunds ? `$${systemFunds.contract_fund.toLocaleString()}` : "$0",
+      description: "Available for contracts",
       icon: DollarSign,
     },
     {
-      title: "Contract Capital",
-      value: tradingStats ? `$${tradingStats.totalCapital.toLocaleString()}` : "$0",
-      description: "Active contracts",
-      icon: Wallet,
-    },
-    {
-      title: "Contract Profit",
-      value: tradingStats ? `$${tradingStats.totalProfit.toLocaleString()}` : "$0",
-      description: "Total profit",
+      title: "Total Profit",
+      value: systemFunds ? `$${systemFunds.profit.toLocaleString()}` : "$0",
+      description: "Accumulated profit",
       icon: TrendingUp,
     },
     {
-      title: "Active Bots",
-      value: tradingStats?.activeBots.toString() || "0",
-      description: "Currently running",
-      icon: Activity,
-    },
-    {
-      title: "Connected Brokers",
-      value: tradingStats?.brokerConnections.toString() || "0",
-      description: "API integrations",
-      icon: Users,
+      title: "Withdrawable Funds",
+      value: systemFunds ? `$${systemFunds.withdrawable_funds.toLocaleString()}` : "$0",
+      description: "Available to withdraw",
+      icon: Wallet,
     },
   ];
 
   return (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
+    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (

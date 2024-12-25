@@ -34,7 +34,7 @@ export default function Index() {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
-      const [tradingVolume, activeBots, brokerConnections, performance, contracts, accounts] = await Promise.all([
+      const [tradingVolume, activeBots, brokerConnections, performance] = await Promise.all([
         supabase
           .from("bot_trades")
           .select("entry_price, quantity")
@@ -55,15 +55,6 @@ export default function Index() {
           .select("pnl")
           .eq("user_id", user.user.id)
           .gte("created_at", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()),
-        supabase
-          .from("contracts")
-          .select("capital, profit")
-          .eq("user_id", user.user.id)
-          .eq("status", "active"),
-        supabase
-          .from("trading_accounts")
-          .select("balance")
-          .eq("user_id", user.user.id)
       ]);
 
       const volume = tradingVolume.data?.reduce((acc, trade) => 
@@ -72,24 +63,29 @@ export default function Index() {
       const monthlyPnl = performance.data?.reduce((acc, trade) => 
         acc + (Number(trade.pnl) || 0), 0) || 0;
 
-      const totalCapital = contracts.data?.reduce((acc, contract) => 
-        acc + Number(contract.capital), 0) || 0;
-
-      const totalProfit = contracts.data?.reduce((acc, contract) => 
-        acc + Number(contract.profit), 0) || 0;
-
-      const totalBalance = accounts.data?.reduce((acc, account) => 
-        acc + Number(account.balance), 0) || 0;
-
       return {
         volume,
         activeBots: activeBots.data?.length || 0,
         brokerConnections: brokerConnections.data?.length || 0,
         monthlyReturn: monthlyPnl,
-        totalCapital,
-        totalProfit,
-        totalBalance
       };
+    },
+  });
+
+  const { data: systemFunds } = useQuery({
+    queryKey: ["system-funds"],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("system_funds")
+        .select("*")
+        .eq("user_id", user.user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
     },
   });
   
@@ -122,7 +118,7 @@ export default function Index() {
         </Button>
       </div>
 
-      <StatsDisplay tradingStats={tradingStats} />
+      <StatsDisplay tradingStats={tradingStats} systemFunds={systemFunds} />
       
       {!isAdmin && <SystemInfoDisplay />}
 
