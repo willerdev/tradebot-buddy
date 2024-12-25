@@ -48,6 +48,9 @@ export function TradingParameters({
   onProfitTargetChange,
   onFundSplitChange,
 }: TradingParametersProps) {
+  // Find the corresponding days for the current profit target
+  const currentTargetDays = PROFIT_TARGETS.find(t => t.value === profitTarget)?.days || 3;
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium flex items-center gap-2">
@@ -116,26 +119,26 @@ export function TradingParameters({
         </div>
 
         <div className="space-y-2">
-          <Label>Profit Target</Label>
-          <Select 
-            value={profitTarget.toString()} 
-            onValueChange={(value) => onProfitTargetChange(parseFloat(value))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select profit target" />
-            </SelectTrigger>
-            <SelectContent>
-              {PROFIT_TARGETS.map((target) => (
-                <SelectItem key={target.value} value={target.value.toString()}>
-                  {target.value}% (≈{target.days} days)
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label>Profit Target ({profitTarget}% ≈ {currentTargetDays} days)</Label>
+          <div className="flex items-center gap-4">
+            <Slider
+              value={[profitTarget]}
+              onValueChange={(values) => {
+                const nearestTarget = PROFIT_TARGETS.reduce((prev, curr) => {
+                  return Math.abs(curr.value - values[0]) < Math.abs(prev.value - values[0]) ? curr : prev;
+                });
+                onProfitTargetChange(nearestTarget.value);
+              }}
+              min={0.5}
+              max={10}
+              step={0.5}
+              className="flex-1"
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
-          <Label>Fund Split Percentage for Bot/Contract Operations</Label>
+          <Label>Fund Split Percentage (Bot: {100 - fundSplitPercentage}% / Contract: {fundSplitPercentage}%)</Label>
           <div className="flex items-center gap-4">
             <Slider
               value={[fundSplitPercentage]}
@@ -145,7 +148,6 @@ export function TradingParameters({
               step={5}
               className="flex-1"
             />
-            <span className="min-w-[60px] text-right">{fundSplitPercentage}%</span>
           </div>
         </div>
       </div>

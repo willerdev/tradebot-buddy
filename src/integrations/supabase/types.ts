@@ -822,6 +822,76 @@ export type Database = {
         }
         Relationships: []
       }
+      copytrader_accounts: {
+        Row: {
+          copytrader_id: string | null
+          created_at: string
+          email: string
+          id: string
+          last_login: string | null
+          password_hash: string
+          username: string | null
+        }
+        Insert: {
+          copytrader_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          last_login?: string | null
+          password_hash: string
+          username?: string | null
+        }
+        Update: {
+          copytrader_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          last_login?: string | null
+          password_hash?: string
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copytrader_accounts_copytrader_id_fkey"
+            columns: ["copytrader_id"]
+            isOneToOne: false
+            referencedRelation: "copytraders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      copytrader_daily_profits: {
+        Row: {
+          copytrader_id: string | null
+          created_at: string
+          date: string
+          id: string
+          profit_amount: number
+        }
+        Insert: {
+          copytrader_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          profit_amount?: number
+        }
+        Update: {
+          copytrader_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          profit_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copytrader_daily_profits_copytrader_id_fkey"
+            columns: ["copytrader_id"]
+            isOneToOne: false
+            referencedRelation: "copytraders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copytrader_settings: {
         Row: {
           copytrader_id: string | null
