@@ -822,6 +822,50 @@ export type Database = {
         }
         Relationships: []
       }
+      copytrader_bot_status: {
+        Row: {
+          copytrader_id: string | null
+          created_at: string
+          current_profit: number
+          id: string
+          investment_amount: number
+          last_trade_at: string | null
+          profit_percentage: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          copytrader_id?: string | null
+          created_at?: string
+          current_profit?: number
+          id?: string
+          investment_amount?: number
+          last_trade_at?: string | null
+          profit_percentage?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          copytrader_id?: string | null
+          created_at?: string
+          current_profit?: number
+          id?: string
+          investment_amount?: number
+          last_trade_at?: string | null
+          profit_percentage?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copytrader_bot_status_copytrader_id_fkey"
+            columns: ["copytrader_id"]
+            isOneToOne: false
+            referencedRelation: "copytraders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       copytrader_daily_profits: {
         Row: {
           copytrader_id: string | null
@@ -847,6 +891,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "copytrader_daily_profits_copytrader_id_fkey"
+            columns: ["copytrader_id"]
+            isOneToOne: false
+            referencedRelation: "copytraders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      copytrader_reports: {
+        Row: {
+          copytrader_id: string | null
+          created_at: string
+          id: string
+          investment_amount: number
+          profit_amount: number
+          profit_percentage: number
+          report_date: string
+        }
+        Insert: {
+          copytrader_id?: string | null
+          created_at?: string
+          id?: string
+          investment_amount?: number
+          profit_amount?: number
+          profit_percentage?: number
+          report_date?: string
+        }
+        Update: {
+          copytrader_id?: string | null
+          created_at?: string
+          id?: string
+          investment_amount?: number
+          profit_amount?: number
+          profit_percentage?: number
+          report_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "copytrader_reports_copytrader_id_fkey"
             columns: ["copytrader_id"]
             isOneToOne: false
             referencedRelation: "copytraders"

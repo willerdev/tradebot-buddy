@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LineChart, Bot, Wallet, DollarSign, Settings } from "lucide-react";
+import { LineChart, Bot, Wallet, DollarSign, Settings, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,9 +15,10 @@ const adminMenuItems = [
 const copytraderMenuItems = [
   { title: "Dashboard", icon: LineChart, path: "/copytrader/dashboard" },
   { title: "Bot Status", icon: Bot, path: "/bot-status" },
-  { title: "Deposit", icon: Wallet, path: "/deposit" },
-  { title: "Withdraw", icon: DollarSign, path: "/withdraw" },
-  { title: "Settings", icon: Settings, path: "/settings" },
+  { title: "Reports", icon: FileText, path: "/copytrader/reports" },
+  { title: "Deposit", icon: Wallet, path: "/copytrader/deposit" },
+  { title: "Withdraw", icon: DollarSign, path: "/copytrader/withdraw" },
+  { title: "Settings", icon: Settings, path: "/copytrader/settings" },
 ];
 
 export function AppMobileNav() {

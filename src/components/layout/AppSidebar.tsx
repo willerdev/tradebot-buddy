@@ -28,9 +28,10 @@ const adminMenuItems = [
 const copytraderMenuItems = [
   { title: "Dashboard", icon: LineChart, path: "/copytrader/dashboard" },
   { title: "Bot Status", icon: Bot, path: "/bot-status" },
-  { title: "Deposit", icon: Wallet, path: "/deposit" },
-  { title: "Withdraw", icon: DollarSign, path: "/withdraw" },
-  { title: "Settings", icon: Settings, path: "/settings" },
+  { title: "Reports", icon: FileText, path: "/copytrader/reports" },
+  { title: "Deposit", icon: Wallet, path: "/copytrader/deposit" },
+  { title: "Withdraw", icon: DollarSign, path: "/copytrader/withdraw" },
+  { title: "Settings", icon: Settings, path: "/copytrader/settings" },
 ];
 
 export function AppSidebar() {
