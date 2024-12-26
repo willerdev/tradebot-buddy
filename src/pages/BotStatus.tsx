@@ -38,18 +38,12 @@ export default function BotStatus() {
       return copytraderData;
     },
     retry: 1,
-    meta: {
-      errorMessage: "Failed to load bot status"
-    },
-    onSettled: (data, error) => {
-      if (error) {
-        console.error("Error fetching copytrader:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load bot status",
-          variant: "destructive",
-        });
-      }
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to load bot status",
+        variant: "destructive",
+      });
     }
   });
 
