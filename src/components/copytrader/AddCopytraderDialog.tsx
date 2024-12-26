@@ -5,7 +5,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CopytraderForm } from "./CopytraderForm";
-import bcrypt from "bcryptjs";
 
 interface AddCopytraderDialogProps {
   onCopytraderAdded: () => void;
@@ -20,15 +19,20 @@ export function AddCopytraderDialog({ onCopytraderAdded }: AddCopytraderDialogPr
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error("Not authenticated");
 
-      // Hash the password
-      const saltRounds = 10;
-      const hashedPassword = await bcrypt.hash(values.password, saltRounds);
+      // First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: values.email,
+        password: values.password,
+        email_confirm: true
+      });
 
-      // First create the copytrader
+      if (authError) throw authError;
+
+      // Then create the copytrader
       const { data: copytrader, error: copytraderError } = await supabase
         .from("copytraders")
         .insert({
-          user_id: user.user.id,
+          user_id: authData.user.id,
           trader_name: values.trader_name,
           description: values.description,
           email: values.email,
@@ -39,18 +43,6 @@ export function AddCopytraderDialog({ onCopytraderAdded }: AddCopytraderDialogPr
         .single();
 
       if (copytraderError) throw copytraderError;
-
-      // Then create the copytrader account with hashed password
-      const { error: accountError } = await supabase
-        .from("copytrader_accounts")
-        .insert({
-          copytrader_id: copytrader.id,
-          email: values.email,
-          username: values.username,
-          password_hash: hashedPassword, // Store the hashed password
-        });
-
-      if (accountError) throw accountError;
 
       // Finally create the copytrader settings
       const { error: settingsError } = await supabase

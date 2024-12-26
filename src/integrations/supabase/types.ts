@@ -822,44 +822,6 @@ export type Database = {
         }
         Relationships: []
       }
-      copytrader_accounts: {
-        Row: {
-          copytrader_id: string | null
-          created_at: string
-          email: string
-          id: string
-          last_login: string | null
-          password_hash: string
-          username: string | null
-        }
-        Insert: {
-          copytrader_id?: string | null
-          created_at?: string
-          email: string
-          id?: string
-          last_login?: string | null
-          password_hash: string
-          username?: string | null
-        }
-        Update: {
-          copytrader_id?: string | null
-          created_at?: string
-          email?: string
-          id?: string
-          last_login?: string | null
-          password_hash?: string
-          username?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "copytrader_accounts_copytrader_id_fkey"
-            columns: ["copytrader_id"]
-            isOneToOne: false
-            referencedRelation: "copytraders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       copytrader_daily_profits: {
         Row: {
           copytrader_id: string | null
@@ -1382,6 +1344,7 @@ export type Database = {
           id: string
           is_admin: boolean | null
           phone: string | null
+          user_type: string | null
           username: string | null
         }
         Insert: {
@@ -1392,6 +1355,7 @@ export type Database = {
           id: string
           is_admin?: boolean | null
           phone?: string | null
+          user_type?: string | null
           username?: string | null
         }
         Update: {
@@ -1402,6 +1366,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
           phone?: string | null
+          user_type?: string | null
           username?: string | null
         }
         Relationships: []
