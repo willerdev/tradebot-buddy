@@ -15,6 +15,8 @@ import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import CopytraderDashboard from "./pages/CopytraderDashboard";
 import BotStatus from "./pages/BotStatus";
+import CopytraderWithdraw from "./pages/CopytraderWithdraw";
+import CopytraderDeposit from "./pages/CopytraderDeposit";
 
 const queryClient = new QueryClient();
 
@@ -38,8 +40,8 @@ const App = () => (
             <Route path="/copytrader/dashboard" element={<CopytraderDashboard />} />
             <Route path="/bot-status" element={<BotStatus />} />
             <Route path="/copytrader/reports" element={<Reports />} />
-            <Route path="/copytrader/deposit" element={<Reports />} />
-            <Route path="/copytrader/withdraw" element={<Reports />} />
+            <Route path="/copytrader/deposit" element={<CopytraderDeposit />} />
+            <Route path="/copytrader/withdraw" element={<CopytraderWithdraw />} />
             <Route path="/copytrader/settings" element={<Settings />} />
           </Route>
         </Routes>
