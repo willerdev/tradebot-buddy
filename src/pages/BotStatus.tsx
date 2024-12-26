@@ -1,117 +1,73 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card } from "@/components/ui/card";
+import { BotStatusCard } from "@/components/copytrader/BotStatusCard";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2 } from "lucide-react";
 
 export default function BotStatus() {
   const { toast } = useToast();
 
-  const { data: copytrader, isLoading: isLoadingCopytrader } = useQuery({
-    queryKey: ["copytrader"],
+  const { data: copytraders } = useQuery({
+    queryKey: ["copytrader-status"],
     queryFn: async () => {
-      console.log("Fetching bot status...");
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("Not authenticated");
 
-      const { data: copytraderData, error } = await supabase
-        .from("copytraders")
-        .select(`
-          id,
-          trader_name,
-          copytrader_bot_status (
-            status,
-            investment_amount,
-            current_profit,
-            profit_percentage,
-            last_trade_at
-          )
-        `)
-        .eq("user_id", user.id)
-        .maybeSingle();
+        const { data, error } = await supabase
+          .from("copytraders")
+          .select(`
+            id,
+            trader_name,
+            copytrader_bot_status (
+              status,
+              investment_amount,
+              current_profit,
+              profit_percentage,
+              last_trade_at
+            )
+          `)
+          .eq("user_id", user.id)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching copytrader:", error);
+        if (error) {
+          console.error("Error fetching copytrader status:", error);
+          toast({
+            title: "Error",
+            description: "Failed to fetch bot status",
+            variant: "destructive",
+          });
+          throw error;
+        }
+
+        return data;
+      } catch (error) {
+        console.error("Error in query:", error);
         throw error;
       }
-
-      return copytraderData;
     },
-    retry: 1,
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to load bot status",
-        variant: "destructive",
-      });
-    }
+    meta: {
+      errorMessage: "Failed to fetch bot status",
+    },
   });
 
-  if (isLoadingCopytrader) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px]">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!copytrader) {
-    return (
-      <Card className="p-6">
-        <p className="text-center text-muted-foreground">
-          No copytrader data found. Please set up your copytrader profile first.
-        </p>
-      </Card>
-    );
-  }
-
-  const botStatus = copytrader.copytrader_bot_status?.[0];
-
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-6 space-y-8">
       <div>
         <h1 className="text-3xl font-bold">Bot Status</h1>
-        <p className="text-muted-foreground">Monitor your trading bot's performance</p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="p-6">
-          <h3 className="font-semibold text-sm text-muted-foreground">Status</h3>
-          <p className="mt-2 text-2xl font-bold">
-            {botStatus?.status || "Inactive"}
-          </p>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="font-semibold text-sm text-muted-foreground">Investment</h3>
-          <p className="mt-2 text-2xl font-bold">
-            ${botStatus?.investment_amount?.toFixed(2) || "0.00"}
-          </p>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="font-semibold text-sm text-muted-foreground">Current Profit</h3>
-          <p className="mt-2 text-2xl font-bold">
-            ${botStatus?.current_profit?.toFixed(2) || "0.00"}
-          </p>
-        </Card>
-
-        <Card className="p-6">
-          <h3 className="font-semibold text-sm text-muted-foreground">Profit %</h3>
-          <p className="mt-2 text-2xl font-bold">
-            {botStatus?.profit_percentage?.toFixed(2) || "0.00"}%
-          </p>
-        </Card>
-      </div>
-
-      <Card className="p-6">
-        <h2 className="text-xl font-semibold mb-4">Trading Activity</h2>
         <p className="text-muted-foreground">
-          Last trade: {botStatus?.last_trade_at 
-            ? new Date(botStatus.last_trade_at).toLocaleString() 
-            : "No trades yet"}
+          Monitor your copytrading bot performance
         </p>
-      </Card>
+      </div>
+
+      <div className="grid gap-4">
+        {copytraders?.copytrader_bot_status?.map((status, index) => (
+          <BotStatusCard
+            key={index}
+            traderName={copytraders.trader_name}
+            status={status}
+          />
+        ))}
+      </div>
     </div>
   );
 }
