@@ -32,21 +32,16 @@ export default function AuthPage() {
 
           // If no profile exists, create one
           if (!profile) {
-            const isAdmin = ['willeratmit12@gmail.com', 'rukundo18@gmail.com'].includes(session.user.email || '');
             const { error: insertError } = await supabase
               .from('profiles')
               .insert({
                 id: session.user.id,
-                user_type: isAdmin ? 'admin' : 'copytrader'
+                user_type: 'copytrader'
               });
             
             if (insertError) throw insertError;
             
-            if (isAdmin) {
-              navigate("/dashboard");
-            } else {
-              navigate("/copytrader/dashboard");
-            }
+            navigate("/copytrader/dashboard");
             return;
           }
 
@@ -69,70 +64,6 @@ export default function AuthPage() {
     };
 
     checkExistingSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth event:", event);
-      
-      if (event === "SIGNED_IN" && session) {
-        try {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('user_type')
-            .eq('id', session.user.id)
-            .maybeSingle();
-
-          if (profileError) throw profileError;
-
-          // If no profile exists, create one
-          if (!profile) {
-            const isAdmin = ['willeratmit12@gmail.com', 'rukundo18@gmail.com'].includes(session.user.email || '');
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert({
-                id: session.user.id,
-                user_type: isAdmin ? 'admin' : 'copytrader'
-              });
-            
-            if (insertError) throw insertError;
-            
-            toast({
-              title: "Welcome!",
-              description: "Your account has been created successfully.",
-            });
-
-            if (isAdmin) {
-              navigate("/dashboard");
-            } else {
-              navigate("/copytrader/dashboard");
-            }
-            return;
-          }
-
-          toast({
-            title: "Welcome back!",
-            description: "You have successfully signed in.",
-          });
-
-          if (profile.user_type === 'admin') {
-            navigate("/dashboard");
-          } else {
-            navigate("/copytrader/dashboard");
-          }
-        } catch (err) {
-          console.error("Profile creation/check error:", err);
-          toast({
-            title: "Error",
-            description: "Failed to setup user profile. Please try again.",
-            variant: "destructive",
-          });
-        }
-      }
-    });
-
-    return () => {
-      console.log("Cleaning up auth subscription");
-      subscription.unsubscribe();
-    };
   }, [navigate, toast]);
 
   return (

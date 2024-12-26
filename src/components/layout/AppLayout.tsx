@@ -20,6 +20,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         if (!session && location.pathname !== "/auth") {
           console.log("No session found, redirecting to auth");
           navigate("/auth");
+          return;
         }
       } catch (error) {
         console.error("Auth error:", error);
@@ -38,6 +39,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       console.log("Auth state changed:", event);
       
       if (event === 'SIGNED_OUT' || !session) {
+        console.log("User signed out or session expired, redirecting to auth");
         navigate("/auth");
       }
     });
@@ -46,8 +48,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
-  }, [navigate, location]);
+  }, [navigate, location.pathname, toast]);
 
+  // Don't render layout for auth page
   if (location.pathname === "/auth") {
     return children;
   }
