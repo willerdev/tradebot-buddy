@@ -13,16 +13,48 @@ export default function CopytraderDashboard() {
   const { data: dashboardData } = useQuery({
     queryKey: ["copytrader-dashboard"],
     queryFn: async () => {
+      console.log("Fetching dashboard data...");
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data: systemFunds } = await supabase
+      // First try to get existing system funds
+      const { data: existingFunds, error: fetchError } = await supabase
         .from('system_funds')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      return systemFunds;
+      if (fetchError) {
+        console.error("Error fetching system funds:", fetchError);
+        throw fetchError;
+      }
+
+      // If no system funds exist, create a default record
+      if (!existingFunds) {
+        console.log("No system funds found, creating default record");
+        const { data: newFunds, error: insertError } = await supabase
+          .from('system_funds')
+          .insert([
+            { 
+              user_id: user.id,
+              system_fund: 0,
+              contract_fund: 0,
+              profit: 0,
+              withdrawable_funds: 0
+            }
+          ])
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("Error creating system funds:", insertError);
+          throw insertError;
+        }
+
+        return newFunds;
+      }
+
+      return existingFunds;
     },
   });
 
