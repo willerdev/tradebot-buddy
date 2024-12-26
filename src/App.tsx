@@ -11,6 +11,8 @@ import Contract from "./pages/Contract";
 import Copytraders from "./pages/Copytraders";
 import Reports from "./pages/Reports";
 import BotSettings from "./pages/BotSettings";
+import Withdraw from "./pages/Withdraw";
+import Deposit from "./pages/Deposit";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
 import CopytraderDashboard from "./pages/CopytraderDashboard";
@@ -35,6 +37,8 @@ const App = () => (
             <Route path="/bots" element={<Bots />} />
             <Route path="/bot-settings" element={<BotSettings />} />
             <Route path="/contract" element={<Contract />} />
+            <Route path="/withdraw" element={<Withdraw />} />
+            <Route path="/deposit" element={<Deposit />} />
             <Route path="/copytraders" element={<Copytraders />} />
             <Route path="/reports" element={<Reports />} />
             <Route path="/copytrader/dashboard" element={<CopytraderDashboard />} />
