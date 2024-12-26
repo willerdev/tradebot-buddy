@@ -1,30 +1,45 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Bot, GitCompare, Settings } from "lucide-react";
+import { LineChart, Bot, Wallet, DollarSign, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
 
-const menuItems = [
-  { title: "Home", icon: Home, path: "/dashboard" },
+const adminMenuItems = [
+  { title: "Home", icon: LineChart, path: "/dashboard" },
   { title: "Bots", icon: Bot, path: "/bots" },
-  { title: "Contract", icon: GitCompare, path: "/contract" },
+  { title: "Deposit", icon: Wallet, path: "/deposit" },
+  { title: "Withdraw", icon: DollarSign, path: "/withdraw" },
+  { title: "Settings", icon: Settings, path: "/settings" },
+];
+
+const copytraderMenuItems = [
+  { title: "Dashboard", icon: LineChart, path: "/copytrader/dashboard" },
+  { title: "Bot Status", icon: Bot, path: "/bot-status" },
+  { title: "Deposit", icon: Wallet, path: "/deposit" },
+  { title: "Withdraw", icon: DollarSign, path: "/withdraw" },
   { title: "Settings", icon: Settings, path: "/settings" },
 ];
 
 export function AppMobileNav() {
   const location = useLocation();
-  const { toast } = useToast();
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
+      const { data } = await supabase
+        .from("admins")
+        .select("*")
+        .eq("user_id", user.user.id)
+        .maybeSingle();
+
+      return !!data;
+    },
+  });
+
+  const menuItems = isAdmin ? adminMenuItems : copytraderMenuItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background md:hidden">
