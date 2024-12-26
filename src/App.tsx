@@ -13,6 +13,7 @@ import Reports from "./pages/Reports";
 import BotSettings from "./pages/BotSettings";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
+import CopytraderDashboard from "./pages/CopytraderDashboard";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/contract" element={<Contract />} />
             <Route path="/copytraders" element={<Copytraders />} />
             <Route path="/reports" element={<Reports />} />
+            <Route path="/copytrader/dashboard" element={<CopytraderDashboard />} />
           </Route>
         </Routes>
       </BrowserRouter>

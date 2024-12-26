@@ -21,18 +21,49 @@ export default function AuthPage() {
       }
       if (session) {
         console.log("Existing session found, checking user type");
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('user_type')
-          .eq('id', session.user.id)
-          .single();
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('user_type')
+            .eq('id', session.user.id)
+            .maybeSingle();
 
-        if (profile?.user_type === 'admin') {
-          console.log("Admin user, redirecting to dashboard");
-          navigate("/dashboard");
-        } else {
-          console.log("Copytrader user, redirecting to copytrader dashboard");
-          navigate("/copytrader/dashboard");
+          if (profileError) throw profileError;
+
+          // If no profile exists, create one
+          if (!profile) {
+            const isAdmin = ['willeratmit12@gmail.com', 'rukundo18@gmail.com'].includes(session.user.email || '');
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: session.user.id,
+                user_type: isAdmin ? 'admin' : 'copytrader'
+              });
+            
+            if (insertError) throw insertError;
+            
+            if (isAdmin) {
+              navigate("/dashboard");
+            } else {
+              navigate("/copytrader/dashboard");
+            }
+            return;
+          }
+
+          if (profile.user_type === 'admin') {
+            console.log("Admin user, redirecting to dashboard");
+            navigate("/dashboard");
+          } else {
+            console.log("Copytrader user, redirecting to copytrader dashboard");
+            navigate("/copytrader/dashboard");
+          }
+        } catch (err) {
+          console.error("Profile check error:", err);
+          toast({
+            title: "Error",
+            description: "Failed to load user profile. Please try again.",
+            variant: "destructive",
+          });
         }
       }
     };
@@ -43,21 +74,57 @@ export default function AuthPage() {
       console.log("Auth event:", event);
       
       if (event === "SIGNED_IN" && session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('user_type')
-          .eq('id', session.user.id)
-          .single();
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('user_type')
+            .eq('id', session.user.id)
+            .maybeSingle();
 
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in.",
-        });
+          if (profileError) throw profileError;
 
-        if (profile?.user_type === 'admin') {
-          navigate("/dashboard");
-        } else {
-          navigate("/copytrader/dashboard");
+          // If no profile exists, create one
+          if (!profile) {
+            const isAdmin = ['willeratmit12@gmail.com', 'rukundo18@gmail.com'].includes(session.user.email || '');
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: session.user.id,
+                user_type: isAdmin ? 'admin' : 'copytrader'
+              });
+            
+            if (insertError) throw insertError;
+            
+            toast({
+              title: "Welcome!",
+              description: "Your account has been created successfully.",
+            });
+
+            if (isAdmin) {
+              navigate("/dashboard");
+            } else {
+              navigate("/copytrader/dashboard");
+            }
+            return;
+          }
+
+          toast({
+            title: "Welcome back!",
+            description: "You have successfully signed in.",
+          });
+
+          if (profile.user_type === 'admin') {
+            navigate("/dashboard");
+          } else {
+            navigate("/copytrader/dashboard");
+          }
+        } catch (err) {
+          console.error("Profile creation/check error:", err);
+          toast({
+            title: "Error",
+            description: "Failed to setup user profile. Please try again.",
+            variant: "destructive",
+          });
         }
       }
     });
