@@ -1,20 +1,31 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { AppMobileNav } from "./AppMobileNav";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { Loader2 } from "lucide-react";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        setIsLoading(true);
+        console.log("Checking authentication status...");
+        
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          throw sessionError;
+        }
+
         console.log("Current session:", session ? "Active" : "None");
         
         if (!session && location.pathname !== "/auth") {
@@ -22,6 +33,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           navigate("/auth");
           return;
         }
+
+        setIsLoading(false);
       } catch (error) {
         console.error("Auth error:", error);
         toast({
@@ -53,6 +66,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   // Don't render layout for auth page
   if (location.pathname === "/auth") {
     return children;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
