@@ -47,6 +47,22 @@ export default function Withdraw() {
     },
   });
 
+  const { data: systemFunds } = useQuery({
+    queryKey: ["system-funds"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data } = await supabase
+        .from("system_funds")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (isAdmin && botSettings?.withdraw_wallet) {
       setWalletAddress(botSettings.withdraw_wallet);
@@ -58,6 +74,15 @@ export default function Withdraw() {
       setIsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+
+      if (isAdmin && systemFunds && systemFunds.system_fund < 5501) {
+        toast({
+          title: "Insufficient System Balance",
+          description: "System funds are under the minimum operating funds ($5,500) to make withdrawals. Please top up above $5,501.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       const { data: accounts } = await supabase
         .from('trading_accounts')
@@ -111,6 +136,15 @@ export default function Withdraw() {
           Withdraw USDT from your trading account using TRC20 network
         </p>
       </div>
+
+      {isAdmin && systemFunds && systemFunds.system_fund < 5501 && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            System funds are under the minimum operating funds ($5,500) to make withdrawals. Please top up above $5,501.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardHeader>

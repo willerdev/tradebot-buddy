@@ -19,6 +19,7 @@ import CopytraderDashboard from "./pages/CopytraderDashboard";
 import BotStatus from "./pages/BotStatus";
 import CopytraderWithdraw from "./pages/CopytraderWithdraw";
 import CopytraderDeposit from "./pages/CopytraderDeposit";
+import EstimationCalculator from "./pages/EstimationCalculator";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/copytrader/deposit" element={<CopytraderDeposit />} />
             <Route path="/copytrader/withdraw" element={<CopytraderWithdraw />} />
             <Route path="/copytrader/settings" element={<Settings />} />
+            <Route path="/calculator" element={<EstimationCalculator />} />
           </Route>
         </Routes>
       </BrowserRouter>
