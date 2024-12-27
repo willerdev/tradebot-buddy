@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Withdraw() {
   const [walletAddress, setWalletAddress] = useState("");
@@ -14,13 +15,50 @@ export default function Withdraw() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const { data: botSettings } = useQuery({
+    queryKey: ["bot-settings"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data } = await supabase
+        .from("bot_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      return data;
+    },
+  });
+
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data } = await supabase
+        .from("admins")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      return !!data;
+    },
+  });
+
+  useEffect(() => {
+    if (isAdmin && botSettings?.withdraw_wallet) {
+      setWalletAddress(botSettings.withdraw_wallet);
+    }
+  }, [botSettings, isAdmin]);
+
   const handleWithdraw = async () => {
     try {
       setIsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // First check if the user has sufficient balance
       const { data: accounts } = await supabase
         .from('trading_accounts')
         .select('balance')
@@ -42,20 +80,16 @@ export default function Withdraw() {
         amount: Number(amount),
         currency: "USDT",
         wallet_address: walletAddress,
-        status: "pending" // Changed from 'completed' to 'pending' as a safer default
+        status: "pending"
       });
 
-      if (error) {
-        console.error("Withdrawal error:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Withdrawal Requested",
         description: "Your withdrawal request has been submitted and is being processed.",
       });
 
-      setWalletAddress("");
       setAmount("");
     } catch (error) {
       console.error("Withdrawal error:", error);
@@ -92,6 +126,7 @@ export default function Withdraw() {
                 placeholder="Enter your TRC20 wallet address"
                 value={walletAddress}
                 onChange={(e) => setWalletAddress(e.target.value)}
+                readOnly={isAdmin}
               />
             </div>
 

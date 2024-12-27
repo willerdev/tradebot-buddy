@@ -53,13 +53,24 @@ export function AppSidebar() {
     },
   });
 
+  const { data: userEmail } = useQuery({
+    queryKey: ["user-email"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user?.email || "";
+    },
+  });
+
   const menuItems = isAdmin ? adminMenuItems : copytraderMenuItems;
 
   return (
     <Sidebar>
       <SidebarContent>
-        <div className="p-6">
+        <div className="p-6 space-y-2">
           <h1 className="text-xl font-bold">MuraFx</h1>
+          {userEmail && (
+            <p className="text-sm text-muted-foreground truncate">{userEmail}</p>
+          )}
         </div>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
