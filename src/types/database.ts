@@ -27,3 +27,12 @@ export interface TradingStrategy {
   created_at: string | null;
   updated_at: string | null;
 }
+
+export interface EstimationParameters {
+  id: string;
+  base_amount: number;
+  target_amount: number;
+  days_period: number;
+  created_at: string;
+  updated_at: string;
+}

@@ -4,18 +4,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { EstimationParameters } from "@/types/database";
 
 export default function EstimationCalculator() {
   const [amount, setAmount] = useState<number>(5500);
   const [estimatedRevenue, setEstimatedRevenue] = useState<number>(0);
 
-  const { data: parameters } = useQuery({
+  const { data: parameters } = useQuery<EstimationParameters>({
     queryKey: ["estimation-parameters"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("estimation_parameters")
         .select("*")
         .single();
+      
+      if (error) throw error;
       return data;
     },
   });
@@ -27,7 +30,7 @@ export default function EstimationCalculator() {
                                (parameters.base_amount * parameters.days_period);
       
       // Calculate estimated revenue using the same daily interest rate
-      const estimatedDays = 38; // Using the same period as example
+      const estimatedDays = parameters.days_period; // Using the same period as example
       const calculatedRevenue = amount + (amount * dailyInterestRate * estimatedDays);
       setEstimatedRevenue(Math.round(calculatedRevenue));
     }
@@ -74,7 +77,7 @@ export default function EstimationCalculator() {
                   ${estimatedRevenue.toLocaleString()}
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  in 38 days
+                  in {parameters?.days_period || 38} days
                 </p>
               </div>
             </CardContent>

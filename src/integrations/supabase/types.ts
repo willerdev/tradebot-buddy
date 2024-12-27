@@ -1079,6 +1079,33 @@ export type Database = {
         }
         Relationships: []
       }
+      estimation_parameters: {
+        Row: {
+          base_amount: number
+          created_at: string
+          days_period: number
+          id: string
+          target_amount: number
+          updated_at: string
+        }
+        Insert: {
+          base_amount?: number
+          created_at?: string
+          days_period?: number
+          id?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          base_amount?: number
+          created_at?: string
+          days_period?: number
+          id?: string
+          target_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
