@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LineChart, Bot, Wallet, DollarSign, Settings, FileText } from "lucide-react";
+import { LineChart, Bot, Wallet, DollarSign, Settings, FileText, Calculator } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ const adminMenuItems = [
   { title: "Bots", icon: Bot, path: "/bots" },
   { title: "Deposit", icon: Wallet, path: "/deposit" },
   { title: "Withdraw", icon: DollarSign, path: "/withdraw" },
+  { title: "Calculator", icon: Calculator, path: "/calculator" },
   { title: "Settings", icon: Settings, path: "/settings" },
 ];
 
@@ -18,6 +19,7 @@ const copytraderMenuItems = [
   { title: "Reports", icon: FileText, path: "/copytrader/reports" },
   { title: "Deposit", icon: Wallet, path: "/copytrader/deposit" },
   { title: "Withdraw", icon: DollarSign, path: "/copytrader/withdraw" },
+  { title: "Calculator", icon: Calculator, path: "/calculator" },
   { title: "Settings", icon: Settings, path: "/copytrader/settings" },
 ];
 
