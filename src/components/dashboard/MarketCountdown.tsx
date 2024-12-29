@@ -15,24 +15,44 @@ export function MarketCountdown() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      const { data, error } = await supabase
+      // First try to get existing settings
+      const { data: existingSettings, error: fetchError } = await supabase
         .from("market_hours_settings")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching market hours:", error);
-        // Return default values if no settings found
-        return {
+      if (fetchError) {
+        console.error("Error fetching market hours:", fetchError);
+        throw fetchError;
+      }
+
+      // If no settings exist, create default settings
+      if (!existingSettings) {
+        console.log("No market hours settings found, creating default settings");
+        const defaultSettings = {
+          user_id: user.id,
           market_open_day: 1,
           market_open_hour: 0,
           market_close_day: 5,
           market_close_hour: 22
         };
+
+        const { data: newSettings, error: insertError } = await supabase
+          .from("market_hours_settings")
+          .insert([defaultSettings])
+          .select()
+          .single();
+
+        if (insertError) {
+          console.error("Error creating market hours settings:", insertError);
+          throw insertError;
+        }
+
+        return newSettings;
       }
 
-      return data;
+      return existingSettings;
     }
   });
 
