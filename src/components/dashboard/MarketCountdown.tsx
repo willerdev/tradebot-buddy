@@ -116,16 +116,16 @@ export function MarketCountdown() {
   }, [marketHours]);
 
   return (
-    <Card className={isMarketOpen ? "bg-green-50 dark:bg-green-900/10" : "bg-yellow-50 dark:bg-yellow-900/10"}>
+    <Card className="bg-transparent">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Market Status</CardTitle>
-        <Clock className="h-4 w-4 text-muted-foreground" />
+        <CardTitle className="text-sm font-medium text-white">Market Status</CardTitle>
+        <Clock className="h-4 w-4 text-white/70" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">
+        <div className="text-2xl font-bold text-white">
           {isMarketOpen ? "Open" : "Closed"}
         </div>
-        <p className="text-xs text-black mt-1">
+        <p className="text-lg font-bold text-white mt-1">
           {countdown}
         </p>
       </CardContent>
