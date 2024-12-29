@@ -5,6 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, TrendingUp, Bot } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { MarketCountdown } from "@/components/dashboard/MarketCountdown";
 
 export default function CopytraderDashboard() {
   const navigate = useNavigate();
@@ -127,7 +128,8 @@ export default function CopytraderDashboard() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
+        <MarketCountdown />
         {stats.map((stat) => (
           <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

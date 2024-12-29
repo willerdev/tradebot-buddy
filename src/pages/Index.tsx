@@ -1,6 +1,7 @@
 import { StatsDisplay } from "@/components/dashboard/StatsDisplay";
 import { SystemInfoDisplay } from "@/components/dashboard/SystemInfoDisplay";
 import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
+import { MarketCountdown } from "@/components/dashboard/MarketCountdown";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -66,6 +67,10 @@ export default function Index() {
           </AlertDescription>
         </Alert>
       )}
+
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+        <MarketCountdown />
+      </div>
 
       <StatsDisplay tradingStats={undefined} systemFunds={systemFunds} />
       <SystemInfoDisplay />
