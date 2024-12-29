@@ -125,7 +125,7 @@ export function MarketCountdown() {
         <div className="text-2xl font-bold">
           {isMarketOpen ? "Open" : "Closed"}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-black mt-1">
           {countdown}
         </p>
       </CardContent>
