@@ -1,10 +1,40 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Clock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export function MarketCountdown() {
   const [countdown, setCountdown] = useState<string>("");
   const [isMarketOpen, setIsMarketOpen] = useState<boolean>(false);
+
+  const { data: marketHours } = useQuery({
+    queryKey: ["market-hours-settings"],
+    queryFn: async () => {
+      console.log("Fetching market hours settings...");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("market_hours_settings")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching market hours:", error);
+        // Return default values if no settings found
+        return {
+          market_open_day: 1,
+          market_open_hour: 0,
+          market_close_day: 5,
+          market_close_hour: 22
+        };
+      }
+
+      return data;
+    }
+  });
 
   useEffect(() => {
     const calculateCountdown = () => {
@@ -12,32 +42,45 @@ export function MarketCountdown() {
       const dayOfWeek = now.getUTCDay(); // 0 = Sunday, 1 = Monday, 5 = Friday
       const hours = now.getUTCHours();
       const minutes = now.getUTCMinutes();
-      const seconds = now.getUTCSeconds();
 
-      // Market is open from Monday 00:00 to Friday 22:00 UTC
-      if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Monday to Friday
-        if (dayOfWeek === 5 && hours >= 22) { // Friday after 22:00
+      if (!marketHours) return;
+
+      const openDay = marketHours.market_open_day;
+      const openHour = marketHours.market_open_hour;
+      const closeDay = marketHours.market_close_day;
+      const closeHour = marketHours.market_close_hour;
+
+      // Market is open from configured open day/hour to close day/hour
+      if (dayOfWeek >= openDay && dayOfWeek <= closeDay) {
+        if (dayOfWeek === closeDay && hours >= closeHour) {
           setIsMarketOpen(false);
-          // Calculate time until Monday
-          const hoursToMonday = ((24 - hours) + (2 * 24) + 0) - 1;
+          // Calculate time until next open day
+          const daysUntilOpen = ((7 + openDay - dayOfWeek) % 7);
+          const hoursToOpen = ((24 - hours) + (daysUntilOpen * 24) + openHour);
           const minsToNext = 60 - minutes;
-          setCountdown(`${hoursToMonday}h ${minsToNext}m until market opens`);
+          setCountdown(`${hoursToOpen}h ${minsToNext}m until market opens`);
+        } else if (dayOfWeek === openDay && hours < openHour) {
+          setIsMarketOpen(false);
+          const hoursToOpen = openHour - hours - 1;
+          const minsToNext = 60 - minutes;
+          setCountdown(`${hoursToOpen}h ${minsToNext}m until market opens`);
         } else {
           setIsMarketOpen(true);
-          if (dayOfWeek === 5) { // Friday before 22:00
-            const hoursLeft = 21 - hours;
+          if (dayOfWeek === closeDay) {
+            const hoursLeft = closeHour - hours - 1;
             const minsLeft = 60 - minutes;
             setCountdown(`${hoursLeft}h ${minsLeft}m until market closes`);
           } else {
             setCountdown("Market is open");
           }
         }
-      } else { // Weekend
+      } else {
         setIsMarketOpen(false);
-        const daysToMonday = dayOfWeek === 0 ? 1 : 2;
-        const hoursToMonday = ((24 - hours) + ((daysToMonday - 1) * 24) + 0);
+        // Calculate time until next open day
+        const daysUntilOpen = ((7 + openDay - dayOfWeek) % 7);
+        const hoursToOpen = ((24 - hours) + ((daysUntilOpen - 1) * 24) + openHour);
         const minsToNext = 60 - minutes;
-        setCountdown(`${hoursToMonday}h ${minsToNext}m until market opens`);
+        setCountdown(`${hoursToOpen}h ${minsToNext}m until market opens`);
       }
     };
 
@@ -45,7 +88,7 @@ export function MarketCountdown() {
     const interval = setInterval(calculateCountdown, 60000); // Update every minute
 
     return () => clearInterval(interval);
-  }, []);
+  }, [marketHours]);
 
   return (
     <Card className={isMarketOpen ? "bg-green-50 dark:bg-green-900/10" : "bg-yellow-50 dark:bg-yellow-900/10"}>

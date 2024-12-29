@@ -1171,6 +1171,39 @@ export type Database = {
           },
         ]
       }
+      market_hours_settings: {
+        Row: {
+          created_at: string
+          id: string
+          market_close_day: number
+          market_close_hour: number
+          market_open_day: number
+          market_open_hour: number
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          market_close_day?: number
+          market_close_hour?: number
+          market_open_day?: number
+          market_open_hour?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          market_close_day?: number
+          market_close_hour?: number
+          market_open_day?: number
+          market_open_hour?: number
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       meal_plans: {
         Row: {
           created_at: string | null
