@@ -18,44 +18,55 @@ export default function CopytraderDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // First try to get existing system funds
-      const { data: existingFunds, error: fetchError } = await supabase
+      // First get the copytrader ID for the current user
+      const { data: copytrader, error: copytraderError } = await supabase
+        .from('copytraders')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (copytraderError) {
+        console.error("Error fetching copytrader:", copytraderError);
+        throw copytraderError;
+      }
+
+      if (!copytrader) {
+        return {
+          trading_budget: null,
+          system_fund: 0,
+          profit: 0,
+        };
+      }
+
+      // Get the copytrader settings
+      const { data: settings, error: settingsError } = await supabase
+        .from('copytrader_settings')
+        .select('trading_budget')
+        .eq('copytrader_id', copytrader.id)
+        .maybeSingle();
+
+      if (settingsError) {
+        console.error("Error fetching settings:", settingsError);
+        throw settingsError;
+      }
+
+      // Get system funds
+      const { data: systemFunds, error: fundsError } = await supabase
         .from('system_funds')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      if (fetchError) {
-        console.error("Error fetching system funds:", fetchError);
-        throw fetchError;
+      if (fundsError) {
+        console.error("Error fetching system funds:", fundsError);
+        throw fundsError;
       }
 
-      // If no system funds exist, create a default record
-      if (!existingFunds) {
-        console.log("No system funds found, creating default record");
-        const { data: newFunds, error: insertError } = await supabase
-          .from('system_funds')
-          .insert([
-            { 
-              user_id: user.id,
-              system_fund: 0,
-              contract_fund: 0,
-              profit: 0,
-              withdrawable_funds: 0
-            }
-          ])
-          .select()
-          .single();
-
-        if (insertError) {
-          console.error("Error creating system funds:", insertError);
-          throw insertError;
-        }
-
-        return newFunds;
-      }
-
-      return existingFunds;
+      return {
+        trading_budget: settings?.trading_budget ?? null,
+        system_fund: systemFunds?.system_fund ?? 0,
+        profit: systemFunds?.profit ?? 0,
+      };
     },
   });
 
@@ -101,7 +112,9 @@ export default function CopytraderDashboard() {
   const stats = [
     {
       title: "Invested Amount",
-      value: dashboardData ? `$${dashboardData.system_fund.toLocaleString()}` : "$0",
+      value: dashboardData?.trading_budget === null 
+        ? "Account not setup" 
+        : `$${(dashboardData?.trading_budget || 0).toLocaleString()}`,
       icon: Wallet,
       description: "Total invested capital"
     },
