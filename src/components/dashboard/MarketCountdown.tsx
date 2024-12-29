@@ -42,11 +42,16 @@ export function MarketCountdown() {
           .from("market_hours_settings")
           .insert([defaultSettings])
           .select()
-          .single();
+          .maybeSingle();
 
         if (insertError) {
           console.error("Error creating market hours settings:", insertError);
           throw insertError;
+        }
+
+        if (!newSettings) {
+          console.error("Failed to create market hours settings");
+          throw new Error("Failed to create market hours settings");
         }
 
         return newSettings;
