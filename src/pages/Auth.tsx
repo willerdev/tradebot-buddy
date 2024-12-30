@@ -14,13 +14,70 @@ export default function AuthPage() {
 
   useEffect(() => {
     const checkExistingSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) {
-        console.error("Session check error:", error);
-        return;
+      try {
+        console.log("Checking existing session...");
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Session check error:", error);
+          return;
+        }
+
+        if (session) {
+          console.log("Session found, checking user type");
+          try {
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('user_type')
+              .eq('id', session.user.id)
+              .maybeSingle();
+
+            if (profileError) throw profileError;
+
+            // If no profile exists, create one
+            if (!profile) {
+              const { error: insertError } = await supabase
+                .from('profiles')
+                .insert({
+                  id: session.user.id,
+                  user_type: 'copytrader'
+                });
+              
+              if (insertError) throw insertError;
+              
+              navigate("/copytrader/dashboard");
+              return;
+            }
+
+            if (profile.user_type === 'admin') {
+              console.log("Admin user, redirecting to dashboard");
+              navigate("/dashboard");
+            } else {
+              console.log("Copytrader user, redirecting to copytrader dashboard");
+              navigate("/copytrader/dashboard");
+            }
+          } catch (err) {
+            console.error("Profile check error:", err);
+            toast({
+              title: "Error",
+              description: "Failed to load user profile. Please try again.",
+              variant: "destructive",
+            });
+          }
+        }
+      } catch (err) {
+        console.error("Auth check error:", err);
       }
-      if (session) {
-        console.log("Existing session found, checking user type");
+    };
+
+    checkExistingSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
+      
+      if (event === 'SIGNED_IN' && session) {
+        console.log("User signed in, checking profile");
         try {
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
@@ -46,10 +103,8 @@ export default function AuthPage() {
           }
 
           if (profile.user_type === 'admin') {
-            console.log("Admin user, redirecting to dashboard");
             navigate("/dashboard");
           } else {
-            console.log("Copytrader user, redirecting to copytrader dashboard");
             navigate("/copytrader/dashboard");
           }
         } catch (err) {
@@ -60,10 +115,15 @@ export default function AuthPage() {
             variant: "destructive",
           });
         }
+      } else if (event === 'SIGNED_OUT') {
+        console.log("User signed out");
       }
-    };
+    });
 
-    checkExistingSession();
+    return () => {
+      console.log("Cleaning up auth subscription");
+      subscription.unsubscribe();
+    };
   }, [navigate, toast]);
 
   return (
@@ -98,6 +158,14 @@ export default function AuthPage() {
             }}
             theme="dark"
             providers={[]}
+            onError={(error) => {
+              console.error("Auth error:", error);
+              toast({
+                title: "Authentication Error",
+                description: error.message,
+                variant: "destructive",
+              });
+            }}
           />
         </CardContent>
       </Card>
