@@ -1,4 +1,4 @@
-import { serve } from "https://deno.fresh.run/std@v9.6.1/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const ELASTIC_EMAIL_API_KEY = Deno.env.get('ELASTIC_EMAIL_API_KEY');
 const ELASTIC_EMAIL_API_URL = 'https://api.elasticemail.com/v4/emails';
@@ -12,7 +12,17 @@ interface EmailRequestBody {
   status: string;
 }
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   try {
     const { to, subject, amount, currency, walletAddress, status } = await req.json() as EmailRequestBody;
 
@@ -51,6 +61,8 @@ serve(async (req) => {
       }
     };
 
+    console.log('Sending email with data:', emailData);
+
     const response = await fetch(ELASTIC_EMAIL_API_URL, {
       method: 'POST',
       headers: {
@@ -64,16 +76,30 @@ serve(async (req) => {
       throw new Error(`Failed to send email: ${response.statusText}`);
     }
 
+    const result = await response.json();
+    console.log('Email sent successfully:', result);
+
     return new Response(
       JSON.stringify({ message: "Email sent successfully" }),
-      { headers: { "Content-Type": "application/json" } }
+      { 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json' 
+        } 
+      }
     );
 
   } catch (error) {
     console.error('Error sending email:', error);
     return new Response(
       JSON.stringify({ error: "Failed to send email" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { 
+        status: 500, 
+        headers: { 
+          ...corsHeaders,
+          'Content-Type': 'application/json' 
+        } 
+      }
     );
   }
 });

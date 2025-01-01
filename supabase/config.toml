@@ -2,3 +2,9 @@ project_id = "kzwrefpebgvuaezlfmzn"
 
 [functions.bot-management]
 verify_jwt = true
+
+[functions.contract-bot-management]
+verify_jwt = true
+
+[functions.send-email]
+verify_jwt = true
