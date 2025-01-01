@@ -14,11 +14,39 @@ export function Withdraw() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  const sendWithdrawalEmail = async (email: string, amount: string, walletAddress: string, status: string) => {
+    try {
+      const { error } = await supabase.functions.invoke("send-email", {
+        body: {
+          to: email,
+          subject: "Withdrawal Notification",
+          amount: Number(amount),
+          currency: "USDT",
+          walletAddress,
+          status
+        },
+      });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error sending email notification:", error);
+    }
+  };
+
   const handleWithdraw = async () => {
     try {
       setIsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
+
+      // Get user's email
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile) throw new Error("Profile not found");
 
       const { data: systemFunds } = await supabase
         .from('system_funds')
@@ -44,6 +72,9 @@ export function Withdraw() {
       });
 
       if (error) throw error;
+
+      // Send email notification
+      await sendWithdrawalEmail(user.email!, amount, walletAddress, "pending");
 
       toast({
         title: "Withdrawal Requested",
@@ -121,4 +152,4 @@ export function Withdraw() {
       </Card>
     </div>
   );
-}
+});
