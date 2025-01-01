@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { WithdrawForm } from "@/components/withdraw/WithdrawForm";
+import { WithdrawInfo } from "@/components/withdraw/WithdrawInfo";
 
 export default function Withdraw() {
   const [walletAddress, setWalletAddress] = useState("");
-  const [amount, setAmount] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const { data: botSettings } = useQuery({
@@ -25,7 +22,7 @@ export default function Withdraw() {
         .from("bot_settings")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       return data;
     },
@@ -57,7 +54,7 @@ export default function Withdraw() {
         .from("system_funds")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
       return data;
     },
@@ -69,9 +66,8 @@ export default function Withdraw() {
     }
   }, [botSettings, isAdmin]);
 
-  const handleWithdraw = async () => {
+  const handleWithdraw = async (amount: string, withdrawalAddress: string) => {
     try {
-      setIsLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -84,14 +80,35 @@ export default function Withdraw() {
         return;
       }
 
+      // First check if trading account exists, if not create it
       const { data: accounts } = await supabase
         .from('trading_accounts')
         .select('balance')
         .eq('user_id', user.id)
         .eq('account_type', 'live')
-        .single();
+        .maybeSingle();
 
-      if (!accounts || accounts.balance < Number(amount)) {
+      if (!accounts) {
+        // Create live trading account if it doesn't exist
+        const { error: createError } = await supabase
+          .from('trading_accounts')
+          .insert({
+            user_id: user.id,
+            account_type: 'live',
+            balance: 0
+          });
+
+        if (createError) throw createError;
+        
+        toast({
+          title: "Insufficient Balance",
+          description: "You don't have enough balance for this withdrawal.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (accounts.balance < Number(amount)) {
         toast({
           title: "Insufficient Balance",
           description: "You don't have enough balance for this withdrawal.",
@@ -104,7 +121,7 @@ export default function Withdraw() {
         user_id: user.id,
         amount: Number(amount),
         currency: "USDT",
-        wallet_address: walletAddress,
+        wallet_address: withdrawalAddress,
         status: "pending"
       });
 
@@ -114,17 +131,9 @@ export default function Withdraw() {
         title: "Withdrawal Requested",
         description: "Your withdrawal request has been submitted and is being processed.",
       });
-
-      setAmount("");
     } catch (error) {
       console.error("Withdrawal error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to process withdrawal. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
   };
 
@@ -152,56 +161,13 @@ export default function Withdraw() {
           <CardDescription>Please enter your withdrawal details carefully</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="wallet">TRC20 Wallet Address</Label>
-              <Input
-                id="wallet"
-                placeholder="Enter your TRC20 wallet address"
-                value={walletAddress}
-                onChange={(e) => setWalletAddress(e.target.value)}
-                readOnly={isAdmin}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="amount">Amount (USDT)</Label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="Enter amount to withdraw"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-              />
-            </div>
-
-            <Button 
-              className="w-full" 
-              onClick={handleWithdraw}
-              disabled={!walletAddress || !amount || isLoading}
-            >
-              {isLoading ? "Processing..." : "Withdraw"}
-            </Button>
-          </div>
-
-          <div className="grid gap-2 text-sm">
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">Withdraw Unlocked</span>
-              <span>20 confirmations</span>
-            </div>
-            <div className="flex justify-between py-2 border-b">
-              <span className="text-muted-foreground">Network</span>
-              <span>TRC20</span>
-            </div>
-          </div>
-
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Important Notice</AlertTitle>
-            <AlertDescription className="mt-2 text-sm">
-              Please ensure you are withdrawing to a valid TRC20 wallet address. Withdrawals to incorrect addresses or different networks cannot be recovered. The minimum withdrawal amount is 1 USDT.
-            </AlertDescription>
-          </Alert>
+          <WithdrawForm
+            isAdmin={!!isAdmin}
+            walletAddress={walletAddress}
+            systemFunds={systemFunds}
+            onSubmit={handleWithdraw}
+          />
+          <WithdrawInfo />
         </CardContent>
       </Card>
     </div>
