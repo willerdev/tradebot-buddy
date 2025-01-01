@@ -152,4 +152,4 @@ export function Withdraw() {
       </Card>
     </div>
   );
-});
+}
