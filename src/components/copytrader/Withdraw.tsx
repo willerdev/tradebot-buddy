@@ -14,11 +14,12 @@ export function Withdraw() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const sendWithdrawalEmail = async (email: string, amount: string, walletAddress: string, status: string) => {
+  const sendWithdrawalEmail = async (amount: string, walletAddress: string, status: string) => {
     try {
-      const { error } = await supabase.functions.invoke("send-email", {
+      console.log('Attempting to send withdrawal email notification');
+      
+      const { data, error } = await supabase.functions.invoke("send-email", {
         body: {
-          to: email,
           subject: "Withdrawal Notification",
           amount: Number(amount),
           currency: "USDT",
@@ -27,15 +28,29 @@ export function Withdraw() {
         },
       });
 
-      if (error) throw error;
+      console.log('Email function response:', data);
+
+      if (error) {
+        console.error('Email sending error:', error);
+        throw error;
+      }
+
+      console.log('Email sent successfully');
     } catch (error) {
       console.error("Error sending email notification:", error);
+      toast({
+        title: "Email Notification Failed",
+        description: "Could not send email notification, but your withdrawal was processed.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleWithdraw = async () => {
     try {
       setIsLoading(true);
+      console.log('Starting withdrawal process');
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
@@ -63,6 +78,43 @@ export function Withdraw() {
         return;
       }
 
+      // First check if trading account exists, if not create it
+      const { data: accounts } = await supabase
+        .from('trading_accounts')
+        .select('balance')
+        .eq('user_id', user.id)
+        .eq('account_type', 'live')
+        .maybeSingle();
+
+      if (!accounts) {
+        // Create live trading account if it doesn't exist
+        const { error: createError } = await supabase
+          .from('trading_accounts')
+          .insert({
+            user_id: user.id,
+            account_type: 'live',
+            balance: 0
+          });
+
+        if (createError) throw createError;
+        
+        toast({
+          title: "Insufficient Balance",
+          description: "You don't have enough balance for this withdrawal.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (accounts.balance < Number(amount)) {
+        toast({
+          title: "Insufficient Balance",
+          description: "You don't have enough balance for this withdrawal.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase.from("withdrawals").insert({
         user_id: user.id,
         amount: Number(amount),
@@ -74,7 +126,7 @@ export function Withdraw() {
       if (error) throw error;
 
       // Send email notification
-      await sendWithdrawalEmail(user.email!, amount, walletAddress, "pending");
+      await sendWithdrawalEmail(amount, walletAddress, "pending");
 
       toast({
         title: "Withdrawal Requested",

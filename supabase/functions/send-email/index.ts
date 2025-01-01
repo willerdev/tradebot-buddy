@@ -2,9 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const ELASTIC_EMAIL_API_KEY = Deno.env.get('ELASTIC_EMAIL_API_KEY');
 const ELASTIC_EMAIL_API_URL = 'https://api.elasticemail.com/v4/emails';
+const DEFAULT_EMAIL = "willeratmit12@gmail.com";
 
 interface EmailRequestBody {
-  to: string;
+  to?: string;
   subject: string;
   amount: number;
   currency: string;
@@ -24,7 +25,13 @@ serve(async (req) => {
   }
 
   try {
-    const { to, subject, amount, currency, walletAddress, status } = await req.json() as EmailRequestBody;
+    console.log('Received email request');
+    const { subject, amount, currency, walletAddress, status } = await req.json() as EmailRequestBody;
+    
+    // Always use default email for testing
+    const to = DEFAULT_EMAIL;
+    
+    console.log('Preparing to send email to:', to);
 
     // Your HTML template with replaced values
     const htmlContent = `<!DOCTYPE html>
@@ -49,6 +56,11 @@ serve(async (req) => {
     </body>
     </html>`;
 
+    if (!ELASTIC_EMAIL_API_KEY) {
+      console.error('ELASTIC_EMAIL_API_KEY is not set');
+      throw new Error('Email API key is not configured');
+    }
+
     const emailData = {
       Recipients: [{ Email: to }],
       Content: {
@@ -61,26 +73,26 @@ serve(async (req) => {
       }
     };
 
-    console.log('Sending email with data:', emailData);
+    console.log('Sending email with data:', JSON.stringify(emailData, null, 2));
 
     const response = await fetch(ELASTIC_EMAIL_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-ElasticEmail-ApiKey': ELASTIC_EMAIL_API_KEY!
+        'X-ElasticEmail-ApiKey': ELASTIC_EMAIL_API_KEY
       },
       body: JSON.stringify(emailData)
     });
 
+    const responseText = await response.text();
+    console.log('Elastic Email API response:', response.status, responseText);
+
     if (!response.ok) {
-      throw new Error(`Failed to send email: ${response.statusText}`);
+      throw new Error(`Failed to send email: ${responseText}`);
     }
 
-    const result = await response.json();
-    console.log('Email sent successfully:', result);
-
     return new Response(
-      JSON.stringify({ message: "Email sent successfully" }),
+      JSON.stringify({ message: "Email sent successfully", response: responseText }),
       { 
         headers: { 
           ...corsHeaders,
@@ -92,7 +104,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error sending email:', error);
     return new Response(
-      JSON.stringify({ error: "Failed to send email" }),
+      JSON.stringify({ 
+        error: "Failed to send email",
+        details: error.message,
+      }),
       { 
         status: 500, 
         headers: { 
