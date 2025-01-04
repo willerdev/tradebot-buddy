@@ -18,12 +18,14 @@ export default function CopytraderDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // Get system funds for the user
+      // Get system funds for the user - get the most recent entry
       const { data: systemFunds, error: fundsError } = await supabase
         .from('system_funds')
         .select('system_fund, profit')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
 
       if (fundsError) {
         console.error("Error fetching system funds:", fundsError);
