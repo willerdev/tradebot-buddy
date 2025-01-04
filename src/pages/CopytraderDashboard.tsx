@@ -18,42 +18,10 @@ export default function CopytraderDashboard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
-      // First get the copytrader ID for the current user
-      const { data: copytrader, error: copytraderError } = await supabase
-        .from('copytraders')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (copytraderError) {
-        console.error("Error fetching copytrader:", copytraderError);
-        throw copytraderError;
-      }
-
-      if (!copytrader) {
-        return {
-          trading_budget: null,
-          system_fund: 0,
-          profit: 0,
-        };
-      }
-
-      // Get the copytrader settings
-      const { data: settings, error: settingsError } = await supabase
-        .from('copytrader_settings')
-        .select('trading_budget')
-        .eq('copytrader_id', copytrader.id)
-        .maybeSingle();
-
-      if (settingsError) {
-        console.error("Error fetching settings:", settingsError);
-        throw settingsError;
-      }
-
-      // Get system funds
+      // Get system funds for the user
       const { data: systemFunds, error: fundsError } = await supabase
         .from('system_funds')
-        .select('*')
+        .select('system_fund, profit')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -63,8 +31,7 @@ export default function CopytraderDashboard() {
       }
 
       return {
-        trading_budget: settings?.trading_budget ?? null,
-        system_fund: systemFunds?.system_fund ?? 0,
+        invested_amount: systemFunds?.system_fund ?? 0,
         profit: systemFunds?.profit ?? 0,
       };
     },
@@ -112,15 +79,13 @@ export default function CopytraderDashboard() {
   const stats = [
     {
       title: "Invested Amount",
-      value: dashboardData?.trading_budget === null 
-        ? "Account not setup" 
-        : `$${(dashboardData?.trading_budget || 0).toLocaleString()}`,
+      value: `$${(dashboardData?.invested_amount || 0).toLocaleString()}`,
       icon: Wallet,
       description: "Total invested capital"
     },
     {
       title: "Total Profit",
-      value: dashboardData ? `$${dashboardData.profit.toLocaleString()}` : "$0",
+      value: `$${(dashboardData?.profit || 0).toLocaleString()}`,
       icon: TrendingUp,
       description: "Accumulated profit"
     },
