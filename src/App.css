@@ -7,7 +7,8 @@
 
 @media (max-width: 768px) {
   #root {
-    padding: 0.5rem;
+    padding: 0.5rem 0;
+    max-width: 100%;
   }
 }
 
@@ -45,7 +46,8 @@
 
 @media (max-width: 768px) {
   .card {
-    padding: 1em;
+    padding: 1em 0;
+    width: 100%;
   }
 }
 

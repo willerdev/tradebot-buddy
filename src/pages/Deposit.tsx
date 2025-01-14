@@ -17,15 +17,15 @@ export default function Deposit() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-8 animate-fade-up">
-      <div>
+    <div className="mx-auto py-6 space-y-8 animate-fade-up px-0 sm:px-6">
+      <div className="px-4 sm:px-0">
         <h1 className="text-3xl font-bold">Deposit USDT</h1>
         <p className="text-muted-foreground">
           Deposit USDT to your trading account using TRC20 network
         </p>
       </div>
 
-      <Card>
+      <Card className="mx-4 sm:mx-0">
         <CardHeader>
           <CardTitle>Deposit Information</CardTitle>
           <CardDescription>Please read carefully before making a deposit</CardDescription>
