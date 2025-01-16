@@ -42,13 +42,16 @@ export function AlgorithmToggle() {
         .select("*")
         .eq('user_id', user.user.id)
         .order('created_at', { ascending: false })
-        .single();
+        .limit(1);
       
       if (error) throw error;
       
-      // Update local state based on database value
-      setCompromised(data?.algorithm_compromised || false);
-      return data;
+      // Update local state based on most recent record
+      if (data && data.length > 0) {
+        setCompromised(data[0].algorithm_compromised || false);
+        return data[0];
+      }
+      return null;
     },
   });
 
