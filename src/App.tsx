@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import Index from "./pages/Index";
 import Settings from "./pages/Settings";
@@ -21,7 +21,14 @@ import CopytraderWithdraw from "./pages/CopytraderWithdraw";
 import CopytraderDeposit from "./pages/CopytraderDeposit";
 import EstimationCalculator from "./pages/EstimationCalculator";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -49,6 +56,8 @@ const App = () => (
             <Route path="/copytrader/withdraw" element={<CopytraderWithdraw />} />
             <Route path="/copytrader/settings" element={<Settings />} />
             <Route path="/calculator" element={<EstimationCalculator />} />
+            {/* Catch all route - redirect to dashboard if no match */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>
