@@ -9,6 +9,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { create } from "zustand";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface AlgorithmStore {
   isCompromised: boolean;
@@ -27,6 +29,28 @@ export function AlgorithmToggle() {
   const [currentStep, setCurrentStep] = useState(0);
   const { toast } = useToast();
   const { isCompromised, setCompromised } = useAlgorithmStore();
+  const queryClient = useQueryClient();
+
+  const { data: systemInfo } = useQuery({
+    queryKey: ["system-info"],
+    queryFn: async () => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error("Not authenticated");
+
+      const { data, error } = await supabase
+        .from("system_info")
+        .select("*")
+        .eq('user_id', user.user.id)
+        .order('created_at', { ascending: false })
+        .single();
+      
+      if (error) throw error;
+      
+      // Update local state based on database value
+      setCompromised(data?.algorithm_compromised || false);
+      return data;
+    },
+  });
 
   const steps = [
     "System fund evaluation...",
@@ -35,17 +59,47 @@ export function AlgorithmToggle() {
     "Performance enhancement...",
   ];
 
-  const handlePinSubmit = () => {
+  const handlePinSubmit = async () => {
     if (pin === "555000") {
-      setCompromised(!isCompromised);
+      const newStatus = !isCompromised;
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return;
+
+      // Update or insert system_info record
+      const { error } = await supabase
+        .from('system_info')
+        .upsert([
+          {
+            user_id: user.user.id,
+            algorithm_compromised: newStatus,
+            title: newStatus ? 'Algorithm Compromised' : 'Algorithm Protected',
+            description: newStatus 
+              ? 'System algorithm has been compromised'
+              : 'System algorithm is protected',
+            status: newStatus ? 'danger' : 'normal'
+          }
+        ]);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update algorithm status",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setCompromised(newStatus);
       setShowPinModal(false);
       setPin("");
+      queryClient.invalidateQueries({ queryKey: ["system-info"] });
+      
       toast({
-        title: isCompromised ? "Algorithm Protected" : "Algorithm Compromised",
-        description: isCompromised 
-          ? "System has been secured"
-          : "Warning: System algorithm has been compromised",
-        variant: isCompromised ? "default" : "destructive",
+        title: newStatus ? "Algorithm Compromised" : "Algorithm Protected",
+        description: newStatus 
+          ? "Warning: System algorithm has been compromised"
+          : "System has been secured",
+        variant: newStatus ? "destructive" : "default",
       });
     } else {
       toast({

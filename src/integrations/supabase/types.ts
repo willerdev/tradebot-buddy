@@ -1638,6 +1638,7 @@ export type Database = {
       }
       system_info: {
         Row: {
+          algorithm_compromised: boolean | null
           created_at: string
           description: string | null
           id: string
@@ -1646,6 +1647,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          algorithm_compromised?: boolean | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1654,6 +1656,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          algorithm_compromised?: boolean | null
           created_at?: string
           description?: string | null
           id?: string
