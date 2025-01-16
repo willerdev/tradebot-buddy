@@ -2,6 +2,7 @@ import { StatsDisplay } from "@/components/dashboard/StatsDisplay";
 import { SystemInfoDisplay } from "@/components/dashboard/SystemInfoDisplay";
 import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
 import { MarketCountdown } from "@/components/dashboard/MarketCountdown";
+import { WarningBanner } from "@/components/dashboard/WarningBanner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -49,7 +50,7 @@ export default function Index() {
   });
 
   return (
-    <div className="space-y-8 px-4 sm:px-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
@@ -58,6 +59,8 @@ export default function Index() {
           )}
         </div>
       </div>
+
+      <WarningBanner />
 
       {isAdmin && systemFunds && systemFunds.system_fund < 5500 && (
         <Alert variant="destructive">

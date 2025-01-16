@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, DollarSign, TrendingUp, Users, Wallet } from "lucide-react";
+import { useAlgorithmStore } from "@/components/settings/AlgorithmToggle";
+import { cn } from "@/lib/utils";
 
 interface StatsDisplayProps {
   tradingStats: {
@@ -17,13 +19,14 @@ interface StatsDisplayProps {
 }
 
 export function StatsDisplay({ tradingStats, systemFunds }: StatsDisplayProps) {
+  const { isCompromised } = useAlgorithmStore();
+
   const stats = [
     {
       title: "System Fund",
       value: systemFunds ? `$${systemFunds.system_fund.toLocaleString()}` : "$0",
       description: "Total system balance",
       icon: Wallet,
-      // Removed special className and valueClassName
     },
     {
       title: "Contract Fund",
@@ -58,7 +61,10 @@ export function StatsDisplay({ tradingStats, systemFunds }: StatsDisplayProps) {
               <Icon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className={cn(
+                "text-2xl font-bold",
+                isCompromised && "animate-[pulse_1s_ease-in-out_infinite] text-red-500"
+              )}>
                 {stat.value}
               </div>
               <p className="text-xs text-muted-foreground">

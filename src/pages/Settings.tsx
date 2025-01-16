@@ -6,7 +6,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { AlgorithmToggle } from "@/components/settings/AlgorithmToggle";
 
 export default function Settings() {
   const isMobile = useIsMobile();
@@ -31,12 +32,16 @@ export default function Settings() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Manage your account settings and preferences.</p>
+          <p className="text-muted-foreground">
+            Manage your account settings and preferences.
+          </p>
         </div>
         <Button variant="destructive" onClick={handleLogout}>
           Logout
         </Button>
       </div>
+
+      <AlgorithmToggle />
 
       <Tabs defaultValue="profile" className="w-full">
         <TabsList className="w-full justify-start">
